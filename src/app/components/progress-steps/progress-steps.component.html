@@ -1,5 +1,12 @@
 <div class="progress-steps">
   <div *ngFor="let step of steps" class="step" [ngClass]="{'active': step.active, 'completed': step.completed}">
-    <div class="step-name">{{ step.name }}</div>
+    <div class="step-content">
+      <!-- Use different icons for desktop and mobile with CSS classes -->
+      <span *ngIf="step.completed" class="icon-container">
+        <img src="assets/completed-icon-desktop.svg" alt="Completed" class="completed-icon desktop-only">
+        <img src="assets/completed-icon.svg" alt="Completed" class="completed-icon mobile-only">
+      </span>
+      <div class="step-name">{{ step.name }}</div>
+    </div>
   </div>
 </div>

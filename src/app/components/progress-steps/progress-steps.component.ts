@@ -1,4 +1,4 @@
-import { Component, Input, ViewEncapsulation } from '@angular/core';
+import { Component, Input, ViewEncapsulation, OnInit } from '@angular/core';
 
 interface Step {
   id: string;
@@ -13,7 +13,7 @@ interface Step {
   styleUrls: ['./progress-steps.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class ProgressStepsComponent {
+export class ProgressStepsComponent implements OnInit {
   @Input() currentStep: string = 'business-type';
   
   steps: Step[] = [

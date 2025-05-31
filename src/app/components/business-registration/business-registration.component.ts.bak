@@ -23,19 +23,30 @@ interface CompanyResult {
   encapsulation: ViewEncapsulation.None
 })
 export class BusinessRegistrationComponent implements OnInit {
+  // Current step in the registration process
   currentStep: string = 'business-type';
-  businessTypeSubStep: string = 'entity-type'; // 'entity-type' or 'company-name'
-  selectedBusinessType: string = '';
-  isMobile: boolean = false;
-  welcomeTitle: string = 'Welcome Aboard.';
-  welcomeDescription: string = 'Share your business details for a quick and secure setup, unlocking tailored financial solutions.';
+  businessTypeSubStep: string = 'business-type';
   
-  // Form controls for all steps
-  searchControl = new FormControl('');
+  // Mobile view flag
+  isMobileView: boolean = false;
+  
+  // Progress steps
+  progressSteps = [
+    { id: 'business-type', label: 'Business Type', completed: false },
+    { id: 'merchant-details', label: 'Merchant Details', completed: false },
+    { id: 'business-address', label: 'Business Address', completed: false },
+    { id: 'turnover-funding', label: 'Turnover/Funding Need', completed: false }
+  ];
+  
+  // Business Type form controls
+  businessTypeControl = new FormControl('');
+  companyNameControl = new FormControl('');
+  
+  // Merchant Details form controls
   firstNameControl = new FormControl('');
   lastNameControl = new FormControl('');
-  phoneNumberControl = new FormControl('');
   emailControl = new FormControl('');
+  phoneControl = new FormControl('');
   termsAgreedControl = new FormControl(false);
   
   // Business Address form controls
@@ -51,6 +62,9 @@ export class BusinessRegistrationComponent implements OnInit {
   registeredCompanyName: string = 'Groov Technology Ltd.';
   registeredCompanyAddress: string = '07227081 - 90 York Road, Woking, Surrey, England, GU22 7XR';
   
+  // Filtered address results
+  filteredAddressResults: string[] = [];
+  
   // Address search results
   showAddressResults: boolean = false;
   addressResults: string[] = [
@@ -61,6 +75,61 @@ export class BusinessRegistrationComponent implements OnInit {
     '202 Pine Drive - Edinburgh, EH1 5GH, United Kingdom',
     '303 Birch Boulevard - Cardiff, CF10 6HJ, United Kingdom'
   ];
+  
+  // Turnover/Funding Need form controls
+  monthlyTurnoverControl = new FormControl('');
+  fundingAmountControl = new FormControl('');
+  fundingReasonControl = new FormControl([]);
+  hasExistingLoansControl = new FormControl('');
+  loanProviderControl = new FormControl('');
+  loanAmountControl = new FormControl('');
+  
+  // Turnover/Funding Need dropdown options
+  monthlyTurnoverOptions: string[] = [
+    'Less than £100K',
+    '£100K - £200K',
+    '£200K - £500K',
+    '£500K - 1M',
+    '£1M - 2M',
+    'More than £2M'
+  ];
+  
+  fundingAmountOptions: string[] = [
+    'Less than £100K',
+    '£100K - £200K',
+    '£200K - £500K',
+    '£500K - 1M',
+    '£1M - 2M',
+    'More than £2M'
+  ];
+  
+  fundingReasonOptions: string[] = [
+    'Business expansion',
+    'Improve cashflow',
+    'Vehicle Finance',
+    'Property Finance',
+    'Machinery & Equipment',
+    'Debt refinance',
+    'Inventory/Stock Purchase',
+    'Equipment/Machinery',
+    'Business Interruption',
+    'Extension/Renovation',
+    'Working capital',
+    'Payroll',
+    'Business Debt Consolidation',
+    'Cash Flow',
+    'Quarterly VAT Repayment',
+    'Other'
+  ];
+  
+  // Selected funding reasons
+  selectedFundingReasons: string[] = [];
+  
+  // Show funding reason dropdown
+  showFundingReasonDropdown: boolean = false;
+  
+  // Show loan details
+  showLoanDetails: boolean = false;
   
   showResults: boolean = false;
   companyResults: CompanyResult[] = [];
@@ -112,17 +181,76 @@ export class BusinessRegistrationComponent implements OnInit {
     this.addressSearchControl.valueChanges.subscribe(value => {
       this.searchAddress(value);
     });
+    
+    // Set up existing loans listener
+    this.hasExistingLoansControl.valueChanges.subscribe(value => {
+      this.showLoanDetails = value === 'yes';
+    });
+  }
+  
+  // Address search method
+  searchAddress(searchTerm: string | null) {
+    if (searchTerm && searchTerm.trim().length > 0) {
+      this.filteredAddressResults = this.addressResults.filter(address => 
+        address.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      this.showAddressResults = this.filteredAddressResults.length > 0;
+    } else {
+      this.showAddressResults = false;
+    }
+  }
+  
+  // Turnover/Funding Need methods
+  toggleFundingReasonDropdown() {
+    this.showFundingReasonDropdown = !this.showFundingReasonDropdown;
+  }
+  
+  selectFundingReason(reason: string) {
+    // Add reason if not already selected
+    if (!this.selectedFundingReasons.includes(reason)) {
+      this.selectedFundingReasons.push(reason);
+    }
+    this.showFundingReasonDropdown = false;
+  }
+  
+  removeFundingReason(reason: string) {
+    // Remove reason from selected list
+    this.selectedFundingReasons = this.selectedFundingReasons.filter(r => r !== reason);
+  }
+  
+  setExistingLoans(value: string) {
+    this.hasExistingLoansControl.setValue(value);
+  }
+  
+  // This function is defined elsewhere in the file
+  
+  // Merchant details validation
+  validateMerchantDetails(): boolean {
+    const firstNameValid = this.firstNameControl.value ? this.firstNameControl.value.trim().length > 0 : false;
+    const lastNameValid = this.lastNameControl.value ? this.lastNameControl.value.trim().length > 0 : false;
+    const emailValid = this.emailControl.value ? this.emailControl.value.trim().length > 0 : false;
+    const phoneValid = this.phoneControl.value ? this.phoneControl.value.trim().length > 0 : false;
+    const termsAgreed = this.termsAgreedControl.value;
+    
+    if (!firstNameValid || !lastNameValid || !emailValid || !phoneValid || !termsAgreed) {
+      alert('Please fill in all required fields and agree to the terms.');
+      return false;
+    }
+    
+    // Mark merchant-details step as completed
+    this.updateProgressSteps('merchant-details', true);
+    return true;
   }
   
   @HostListener('window:resize')
   checkScreenSize() {
-    // Set isMobile to true if screen width is less than 768px (bootstrap md breakpoint)
-    const wasMobile = this.isMobile;
-    this.isMobile = window.innerWidth < 768;
+    // Set isMobileView to true if screen width is less than 768px (bootstrap md breakpoint)
+    const wasMobile = this.isMobileView;
+    this.isMobileView = window.innerWidth < 768;
     
     // Log only when the state changes
-    if (wasMobile !== this.isMobile) {
-      console.log('Mobile state changed:', this.isMobile);
+    if (wasMobile !== this.isMobileView) {
+      console.log('Mobile state changed:', this.isMobileView);
     }
   }
   
@@ -130,7 +258,11 @@ export class BusinessRegistrationComponent implements OnInit {
     this.businessTypes.forEach(type => {
       type.selected = type.id === id;
     });
-    this.selectedBusinessType = id;
+    // Store the selected business type ID
+    const selectedType = this.businessTypes.find(type => type.selected);
+    if (selectedType) {
+      this.businessTypeControl.setValue(selectedType.id);
+    }
   }
   
   nextStep() {
@@ -145,40 +277,38 @@ export class BusinessRegistrationComponent implements OnInit {
           } else {
             // For other business types, go to company name step
             this.businessTypeSubStep = 'company-name';
-            // Generate dummy company results
-            this.generateDummyCompanyResults();
           }
         }
       } else if (this.businessTypeSubStep === 'company-name') {
         // Move to merchant details step
         this.currentStep = 'merchant-details';
-        // Mark business-type step as completed
-        this.updateProgressSteps('business-type', true);
       }
     } else if (this.currentStep === 'merchant-details') {
-      // Check if terms are agreed
-      if (this.termsAgreedControl.value) {
-        // Move to business address step
-        this.currentStep = 'business-address';
-        // Mark merchant-details step as completed
-        this.updateProgressSteps('merchant-details', true);
-      } else {
-        alert('Please agree to the terms and conditions to continue.');
+      // Validate merchant details step
+      if (!this.validateMerchantDetails()) {
+        return;
       }
+      // Move to business address step
+      this.currentStep = 'business-address';
     } else if (this.currentStep === 'business-address') {
-      // Validate business address fields
-      if (this.validateBusinessAddress()) {
-        // Move to turnover-funding step (or next step in the flow)
-        this.currentStep = 'turnover-funding';
-        // Mark business-address step as completed
-        this.updateProgressSteps('business-address', true);
+      // Validate business address step
+      if (!this.validateBusinessAddress()) {
+        return;
       }
-    } else {
-      // For other steps, navigate to landing page for now
+      // Move to turnover/funding step
+      this.currentStep = 'turnover-funding';
+    } else if (this.currentStep === 'turnover-funding') {
+      // Validate turnover/funding step
+      if (!this.validateTurnoverFunding()) {
+        return;
+      }
+      // Form completed
+      alert('Form completed successfully!');
+      // Navigate to landing page
       this.router.navigate(['/']);
     }
   }
-  
+
   cancel() {
     if (this.currentStep === 'merchant-details') {
       // Go back to business type step
@@ -216,6 +346,8 @@ export class BusinessRegistrationComponent implements OnInit {
     // Update the registered address details
     this.updateRegisteredAddress();
     
+    // Mark business-address step as completed
+    this.updateProgressSteps('business-address', true);
     return true;
   }
   
@@ -238,10 +370,57 @@ export class BusinessRegistrationComponent implements OnInit {
     this.registeredCompanyAddress = addressParts.join(', ');
   }
   
+  // This function is defined elsewhere in the file
+  
+  // Merchant details validation
+  validateMerchantDetails(): boolean {
+    const firstNameValid = this.firstNameControl.value ? this.firstNameControl.value.trim().length > 0 : false;
+    const lastNameValid = this.lastNameControl.value ? this.lastNameControl.value.trim().length > 0 : false;
+    const emailValid = this.emailControl.value ? this.emailControl.value.trim().length > 0 : false;
+    const phoneValid = this.phoneControl.value ? this.phoneControl.value.trim().length > 0 : false;
+    const termsAgreed = this.termsAgreedControl.value;
+    
+    if (!firstNameValid || !lastNameValid || !emailValid || !phoneValid || !termsAgreed) {
+      alert('Please fill in all required fields and agree to the terms.');
+      return false;
+    }
+    
+    // Mark merchant-details step as completed
+    this.updateProgressSteps('merchant-details', true);
+    return true;
+  }
+  
   editRegisteredAddress() {
     // Toggle to edit mode
     this.hasRegisteredAddress = false;
   }
+  
+  // Validate Turnover and Funding step
+  validateTurnoverFunding(): boolean {
+    const monthlyTurnoverValid = this.monthlyTurnoverControl.value ? true : false;
+    const fundingAmountValid = this.fundingAmountControl.value ? true : false;
+    const fundingReasonsValid = this.selectedFundingReasons.length > 0;
+    
+    // Check if existing loans is set to yes, then validate loan details
+    let loanDetailsValid = true;
+    if (this.hasExistingLoansControl.value === 'yes') {
+      const loanProviderValid = this.loanProviderControl.value ? this.loanProviderControl.value.trim().length > 0 : false;
+      const loanAmountValid = this.loanAmountControl.value ? this.loanAmountControl.value.trim().length > 0 : false;
+      loanDetailsValid = loanProviderValid && loanAmountValid;
+    }
+    
+    if (!monthlyTurnoverValid || !fundingAmountValid || !fundingReasonsValid || !loanDetailsValid) {
+      alert('Please fill in all required fields for turnover and funding needs.');
+      return false;
+    }
+    
+    // Mark turnover-funding step as completed
+    this.updateProgressSteps('turnover-funding', true);
+    return true;
+  }
+  
+  // Search control for company search
+  searchControl = new FormControl('');
   
   searchCompany() {
     const searchTerm = this.searchControl.value?.trim().toLowerCase() || '';
@@ -287,20 +466,7 @@ export class BusinessRegistrationComponent implements OnInit {
     this.showResults = false;
   }
   
-  searchAddress(searchTerm: string | null) {
-    if (searchTerm && searchTerm.trim().length > 0) {
-      // Filter address results based on search term
-      const filteredResults = this.addressResults.filter(address => 
-        address.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      
-      // Show results if we have any matches
-      this.showAddressResults = filteredResults.length > 0;
-    } else {
-      // Hide results if search term is empty
-      this.showAddressResults = false;
-    }
-  }
+
   
   selectAddress(address: string) {
     // Set the search control value to the selected address
@@ -343,25 +509,7 @@ export class BusinessRegistrationComponent implements OnInit {
     return false;
   }
   
-  private updateProgressSteps(stepId: string, completed: boolean) {
-    // Get the progress steps component and update the completed status
-    const progressStepsComponent = document.querySelector('app-progress-steps');
-    if (progressStepsComponent) {
-      // Use Angular's way to access the component instance
-      const componentRef = (progressStepsComponent as any).__ngContext__?.find(
-        (node: any) => node && node.constructor && node.constructor.name === 'ProgressStepsComponent'
-      );
-      
-      if (componentRef) {
-        // Update the steps array in the component
-        componentRef.steps.forEach((step: any) => {
-          if (step.id === stepId) {
-            step.completed = completed;
-          }
-        });
-      }
-    }
-  }
+
   
   private generateDummyCompanyResults(): CompanyResult[] {
     this.companyResults = [

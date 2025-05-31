@@ -57,6 +57,50 @@ $breakpoint-md: 768px;
     
     &.completed {
       color: rgba(255, 255, 255, 0.6);
+      
+      .step-content {
+        display: flex;
+        align-items: center;
+        
+        .icon-container {
+          display: inline-block;
+          margin-right: 8px;
+          position: relative;
+        }
+        
+        .completed-icon {
+          display: inline-block;
+          padding: 2px;
+          
+          &.mobile-only {
+            width: 14px;
+            height: 14px;
+            background-color: $primary-blue;
+            border-radius: 50%;
+          }
+          
+          &.desktop-only {
+            width: 18px;
+            height: 18px;
+            background-color: transparent;
+            border: none;
+          }
+        }
+        
+        // Hide desktop icon on mobile
+        @media (max-width: 767px) {
+          .desktop-only {
+            display: none;
+          }
+        }
+        
+        // Hide mobile icon on desktop
+        @media (min-width: 768px) {
+          .mobile-only {
+            display: none;
+          }
+        }
+      }
     }
     
     /* Add spacing between steps */

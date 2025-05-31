@@ -13,10 +13,46 @@
     <!-- Right side with white content container -->
     <div class="right-section">
       <!-- Step tabs for mobile view -->
-      <div class="step-tabs mobile-only-tabs">
-        <div class="tab" [ngClass]="{'active': currentStep === 'business-type'}">Business Type</div>
-        <div class="tab" [ngClass]="{'active': currentStep === 'merchant-details'}">Merchant Details</div>
-        <div class="tab" [ngClass]="{'active': currentStep === 'business-address'}">Business Address</div>
+      <div class="step-tabs mobile-tabs">
+        <div class="tab" [ngClass]="{'active': currentStep === 'business-type', 'completed': isStepCompleted('business-type')}" 
+             [style.background-color]="currentStep === 'business-type' ? '#FFFFFF' : 'transparent'" 
+             [style.color]="currentStep === 'business-type' ? '#3D3D3D' : '#FFFFFF'"
+             [style.font-family]="currentStep === 'business-type' ? 'Figtree, sans-serif' : ''"
+             [style.font-weight]="currentStep === 'business-type' ? '600' : ''">
+          <div class="tab-bullet" 
+               [style.background-color]="isStepCompleted('business-type') ? '#FFFFFF' : 
+                                       (currentStep === 'business-type' ? '#FFFFFF' : 'transparent')"
+               [style.border]="'1px solid #FFFFFF'">
+            <img *ngIf="isStepCompleted('business-type')" src="assets/completed-icon.svg" alt="Completed" class="completed-icon">
+          </div>
+          <div class="tab-text">Business<br>Type</div>
+        </div>
+        <div class="tab" [ngClass]="{'active': currentStep === 'merchant-details', 'completed': isStepCompleted('merchant-details')}" 
+             [style.background-color]="currentStep === 'merchant-details' ? '#FFFFFF' : 'transparent'" 
+             [style.color]="currentStep === 'merchant-details' ? '#3D3D3D' : '#FFFFFF'"
+             [style.font-family]="currentStep === 'merchant-details' ? 'Figtree, sans-serif' : ''"
+             [style.font-weight]="currentStep === 'merchant-details' ? '600' : ''">
+          <div class="tab-bullet" 
+               [style.background-color]="isStepCompleted('merchant-details') ? '#FFFFFF' : 
+                                       (currentStep === 'merchant-details' ? '#FFFFFF' : 'transparent')"
+               [style.border]="'1px solid #FFFFFF'">
+            <img *ngIf="isStepCompleted('merchant-details')" src="assets/completed-icon.svg" alt="Completed" class="completed-icon">
+          </div>
+          <div class="tab-text">Merchant<br>Details</div>
+        </div>
+        <div class="tab" [ngClass]="{'active': currentStep === 'business-address', 'completed': isStepCompleted('business-address')}" 
+             [style.background-color]="currentStep === 'business-address' ? '#FFFFFF' : 'transparent'" 
+             [style.color]="currentStep === 'business-address' ? '#3D3D3D' : '#FFFFFF'"
+             [style.font-family]="currentStep === 'business-address' ? 'Figtree, sans-serif' : ''"
+             [style.font-weight]="currentStep === 'business-address' ? '600' : ''">
+          <div class="tab-bullet" 
+               [style.background-color]="isStepCompleted('business-address') ? '#FFFFFF' : 
+                                       (currentStep === 'business-address' ? '#FFFFFF' : 'transparent')"
+               [style.border]="'1px solid #FFFFFF'">
+            <img *ngIf="isStepCompleted('business-address')" src="assets/completed-icon.svg" alt="Completed" class="completed-icon">
+          </div>
+          <div class="tab-text">Business<br>Address</div>
+        </div>
       </div>
       <div class="content-container">
       <!-- Progress bullet horizontal line above heading -->
@@ -89,7 +125,152 @@
           <button class="btn btn-primary" (click)="nextStep()">NEXT</button>
         </div>
       </div>
+      
+      <!-- Merchant Details Form -->
+      <div class="form-container" *ngIf="currentStep === 'merchant-details'">
+        <div class="form-header">
+          <h3>Tell us a bit about yourself*</h3>
+          <p>Please provide your details so that we can contact you if you need any support or follow-ups.</p>
+        </div>
+        
+        <div class="merchant-details-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">First Name</label>
+              <input type="text" id="firstName" [formControl]="firstNameControl" placeholder="Clinton" class="form-control">
+            </div>
+            
+            <div class="form-group">
+              <label for="lastName">Last Name</label>
+              <input type="text" id="lastName" [formControl]="lastNameControl" placeholder="Foy" class="form-control">
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phoneNumber">Phone number</label>
+              <input type="tel" id="phoneNumber" [formControl]="phoneNumberControl" placeholder="+44 7911 123456" class="form-control">
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Email address</label>
+              <input type="email" id="email" [formControl]="emailControl" placeholder="clinton@groov.com" class="form-control">
+            </div>
+          </div>
+          
+          <div class="form-row terms-row">
+            <div class="form-group terms-group">
+              <div class="terms-checkbox-container">
+                <input type="checkbox" id="termsAgreed" [formControl]="termsAgreedControl" class="terms-checkbox">
+                <label for="termsAgreed" class="terms-label">
+                  I agree to the <a href="#" class="terms-link">Terms and Conditions</a> and <a href="#" class="terms-link">Privacy Policy</a>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="button-group">
+          <button class="btn btn-outline" (click)="cancel()">BACK</button>
+          <button class="btn btn-primary" (click)="nextStep()">NEXT</button>
+        </div>
       </div>
+      
+      <!-- Business Address Form -->
+      <div class="form-container" *ngIf="currentStep === 'business-address'">
+        <div class="form-header">
+          <h3>Business Address</h3>
+          <p>Please confirm your registered or business address</p>
+        </div>
+        
+        <div class="business-address-form">
+          <!-- Registered Address Display - Only shown when address is filled -->
+          <div class="registered-address-container" *ngIf="hasRegisteredAddress">
+            <div class="registered-address-box">
+              <div class="address-icon">
+                <img src="assets/briefcase-01.svg" alt="Business" class="building-icon">
+              </div>
+              <div class="registered-address-details">
+                <h4>{{ registeredCompanyName }}</h4>
+                <p>{{ registeredCompanyAddress }}</p>
+              </div>
+              <div class="edit-icon" (click)="editRegisteredAddress()">
+                <img src="assets/edit-05.svg" alt="Edit" class="edit-address-icon">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Address Search and Form Fields - Only shown when in edit mode -->
+          <div *ngIf="!hasRegisteredAddress">
+            <!-- Address Search -->
+            <div class="address-search-section">
+              <label for="addressSearch" class="search-label">Search Address</label>
+              <div class="search-input-container">
+                <input type="text" 
+                       id="addressSearch"
+                       [formControl]="addressSearchControl" 
+                       placeholder="Search by Post Code, Town/City, full address..." 
+                       class="address-search-input">
+                <div class="dropdown-icon">
+                  <img src="assets/down-arrow.svg" alt="Dropdown" class="down-arrow-icon">
+                </div>
+              </div>
+              
+              <!-- Address Search Results Dropdown -->
+              <div class="address-search-results" *ngIf="showAddressResults">
+                <div class="address-result-item" *ngFor="let address of addressResults" (click)="selectAddress(address)">
+                  {{ address }}
+                </div>
+              </div>
+            </div>
+            
+            <!-- Address Form Fields -->
+            <div class="address-form-fields">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="addressLine1">Address Line 1</label>
+                  <input type="text" id="addressLine1" [formControl]="addressLine1Control" placeholder="Enter full address" class="form-control">
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="addressLine2">Address Line 2 (Optional)</label>
+                  <input type="text" id="addressLine2" [formControl]="addressLine2Control" placeholder="Enter full address" class="form-control">
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="townCity">Town/City</label>
+                  <input type="text" id="townCity" [formControl]="townCityControl" placeholder="Enter town or city" class="form-control">
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="stateRegion">State/Region/Province*</label>
+                  <input type="text" id="stateRegion" [formControl]="stateRegionControl" placeholder="Enter" class="form-control">
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="postCode">Post Code</label>
+                  <input type="text" id="postCode" [formControl]="postCodeControl" placeholder="Enter post code" class="form-control">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Navigation buttons - always visible regardless of edit mode -->
+        <div class="button-group">
+          <button class="btn btn-outline" (click)="cancel()">BACK</button>
+          <button class="btn btn-primary" (click)="nextStep()">NEXT</button>
+        </div>
+      </div>
+    </div>
     </div>
   </div>
 </div>
