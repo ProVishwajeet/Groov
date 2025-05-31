@@ -1,0 +1,85 @@
+<div class="registration-container">
+  <div class="registration-wrapper">
+    <!-- Left side with welcome text and progress steps -->
+    <div class="left-section">
+      <div class="welcome-text">
+        <h2>{{ welcomeTitle }}</h2>
+        <p>{{ welcomeDescription }}</p>
+      </div>
+      
+      <app-progress-steps [currentStep]="currentStep"></app-progress-steps>
+    </div>
+    
+    <!-- Right side with white content container -->
+    <div class="right-section">
+      <div class="content-container">
+      <!-- Step tabs for mobile view -->
+      <div class="step-tabs" *ngIf="isMobile">
+        <div class="tab" [ngClass]="{'active': currentStep === 'business-type'}">Business Type</div>
+        <div class="tab" [ngClass]="{'active': currentStep === 'merchant-details'}">Merchant Details</div>
+        <div class="tab" [ngClass]="{'active': currentStep === 'business-address'}">Business Address</div>
+      </div>
+      
+      <!-- Business Type Selection Form -->
+      <div class="form-container" *ngIf="currentStep === 'business-type'">
+        <div class="form-header">
+          <h3>Your legal entity setup type</h3>
+          <p>Select an option below that fits right for your legal entity.</p>
+        </div>
+        
+        <div class="business-types-list">
+          <div *ngFor="let type of businessTypes" 
+               class="business-type-option" 
+               [ngClass]="{'selected': type.selected}" 
+               (click)="selectBusinessType(type.id)">
+            <div class="business-type-content">
+              <div class="business-type-icon">
+                <!-- Icon based on business type -->
+                <svg *ngIf="type.id === 'sole-trader'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" fill="#437FF3"/>
+                  <path d="M12.0002 14.5C6.99016 14.5 2.91016 17.86 2.91016 22C2.91016 22.28 3.13016 22.5 3.41016 22.5H20.5902C20.8702 22.5 21.0902 22.28 21.0902 22C21.0902 17.86 17.0102 14.5 12.0002 14.5Z" fill="#437FF3"/>
+                </svg>
+                <svg *ngIf="type.id === 'partnership'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 11C18.2091 11 20 9.20914 20 7C20 4.79086 18.2091 3 16 3C13.7909 3 12 4.79086 12 7C12 9.20914 13.7909 11 16 11Z" fill="#437FF3"/>
+                  <path d="M8 11C10.2091 11 12 9.20914 12 7C12 4.79086 10.2091 3 8 3C5.79086 3 4 4.79086 4 7C4 9.20914 5.79086 11 8 11Z" fill="#437FF3"/>
+                  <path d="M16 13C12.67 13 10 15.67 10 19V21H22V19C22 15.67 19.33 13 16 13Z" fill="#437FF3"/>
+                  <path d="M8 13C4.67 13 2 15.67 2 19V21H8V19C8 17.54 8.54 16.19 9.42 15.13C8.97 15.05 8.49 15 8 15Z" fill="#437FF3"/>
+                </svg>
+                <svg *ngIf="type.id === 'ltd'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 8H17V6C17 3.24 14.76 1 12 1C9.24 1 7 3.24 7 6V8H6C4.9 8 4 8.9 4 10V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V10C20 8.9 19.1 8 18 8ZM12 17C10.9 17 10 16.1 10 15C10 13.9 10.9 13 12 13C13.1 13 14 13.9 14 15C14 16.1 13.1 17 12 17ZM15.1 8H8.9V6C8.9 4.29 10.29 2.9 12 2.9C13.71 2.9 15.1 4.29 15.1 6V8Z" fill="#437FF3"/>
+                </svg>
+                <svg *ngIf="type.id === 'llp'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="#437FF3"/>
+                  <path d="M12 17C14.7614 17 17 14.7614 17 12C17 9.23858 14.7614 7 12 7C9.23858 7 7 9.23858 7 12C7 14.7614 9.23858 17 12 17Z" fill="#437FF3"/>
+                </svg>
+                <svg *ngIf="type.id === 'plc'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 10H6V17H4V10Z" fill="#437FF3"/>
+                  <path d="M20 10H18V17H20V10Z" fill="#437FF3"/>
+                  <path d="M11 3.5V2H13V3.5H11Z" fill="#437FF3"/>
+                  <path d="M11 20.5V19H13V20.5H11Z" fill="#437FF3"/>
+                  <path d="M3.5 11V13H2V11H3.5Z" fill="#437FF3"/>
+                  <path d="M22 11V13H20.5V11H22Z" fill="#437FF3"/>
+                  <path d="M18 8H6V6H18V8Z" fill="#437FF3"/>
+                  <path d="M18 18H6V16H18V18Z" fill="#437FF3"/>
+                </svg>
+              </div>
+              <div class="business-type-details">
+                <h4>{{ type.name }}</h4>
+                <p>{{ type.description }}</p>
+              </div>
+              <div class="option-radio">
+                <div class="radio-button" [ngClass]="{'checked': type.selected}"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="button-group">
+          <button class="btn btn-outline" (click)="cancel()">CANCEL</button>
+          <button class="btn btn-primary" (click)="nextStep()">NEXT</button>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>

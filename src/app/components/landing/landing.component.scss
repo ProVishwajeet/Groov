@@ -1,0 +1,212 @@
+@import '../../../assets/scss/variables';
+
+.landing {
+  padding: $spacing-xl 0;
+  background-color: $light-gray;
+  min-height: calc(100vh - 60px); // Adjust based on header height
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden; // To contain the background patterns
+  
+  // Background patterns
+  .bg-pattern {
+    position: absolute;
+    z-index: 0;
+    
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  
+  .left-pattern {
+    bottom: 0;
+    left: 0;
+    width: 200px;
+    height: 200px;
+  }
+  
+  .right-pattern {
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+  }
+  
+  .container {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .hero-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: $spacing-2xl;
+    text-align: center;
+    
+    .hero-content {
+      width: 100%;
+      
+      .hero-title {
+        font-family: 'Figtree', sans-serif;
+        font-weight: 700;
+        font-size: 3rem; /* 48px */
+        line-height: 4rem; /* 64px */
+        letter-spacing: 0%;
+        text-align: center;
+        color: #2E2E2E;
+        margin-bottom: $spacing-sm;
+        padding-top: 3.125rem; /* 50px */
+      }
+      
+      .hero-description {
+        font-family: 'Figtree', sans-serif;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 24px;
+        letter-spacing: 0%;
+        text-align: center;
+        color: #585858;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+    }
+  }
+  
+  .sub-heading {
+    text-align: center;
+    margin-bottom: $spacing-lg;
+    
+    p {
+      font-family: 'Figtree', sans-serif;
+      font-size: 1rem; /* Same as hero description for mobile */
+      font-weight: 400;
+      line-height: 1.5rem;
+      color: #585858;
+    }
+  }
+  
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-lg;
+    margin-bottom: $spacing-2xl;
+    
+    .service-item {
+      min-height: 200px;
+    }
+  }
+  
+  .cta-section {
+    text-align: center;
+    margin-bottom: $spacing-2xl;
+    
+    .cta-button {
+      padding: $spacing-sm $spacing-xl;
+      font-family: 'Figtree', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 24px;
+      letter-spacing: 1px;
+      text-align: center;
+      vertical-align: middle;
+      text-transform: uppercase;
+      background-color: $light-blue;
+      color: $white;
+      border: 1px solid #437FF3;
+      border-radius: $border-radius-md;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      
+      &:hover {
+        background-color: darken($light-blue, 10%);
+      }
+    }
+  }
+  
+  .footer {
+    text-align: center;
+    margin-top: auto;
+    padding-top: $spacing-xl;
+    position: fixed;
+    bottom: 1.25rem; /* 20px */
+    left: 0;
+    right: 0;
+    
+    p {
+      font-size: $font-sm;
+      color: $dark-gray;
+    }
+  }
+}
+
+// Tablet view
+@media (max-width: $breakpoint-lg) {
+  .landing {
+    .bg-pattern {
+      opacity: 0.5;
+      
+      &.left-pattern, &.right-pattern {
+        width: 150px;
+        height: 150px;
+      }
+    }
+    
+    .hero-section {
+      .hero-content {
+        .hero-title {
+          font-size: $font-xl;
+        }
+        
+        .hero-description {
+          font-size: $font-base;
+        }
+      }
+    }
+    
+    .services-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
+
+// Mobile view
+@media (max-width: $breakpoint-md) {
+  .landing {
+    padding: $spacing-lg 0;
+    
+    .bg-pattern {
+      opacity: 0.3;
+      
+      &.left-pattern, &.right-pattern {
+        width: 100px;
+        height: 100px;
+      }
+    }
+    
+    .hero-section {
+      text-align: left;
+      margin-bottom: $spacing-lg;
+      
+      .hero-content {
+        .hero-title {
+          font-size: 2.3rem; /* As requested for mobile */
+          line-height: 2.5rem; /* 40px as requested */
+          margin-bottom: $spacing-sm;
+        }
+        
+        .hero-description {
+          font-size: 1rem; /* As requested for mobile */
+          font-weight: 400; /* As requested for mobile */
+          margin: 0;
+        }
+      }
+    }
+    
+    .services-grid {
+      grid-template-columns: 1fr;
+      gap: $spacing-md;
+    }
+  }
+}

@@ -1,0 +1,43 @@
+<section class="landing">
+  <!-- Background patterns -->
+  <div class="bg-pattern left-pattern">
+    <img src="assets/Left-pattern.svg" alt="">
+  </div>
+  <div class="bg-pattern right-pattern">
+    <img src="assets/right-pattern.svg" alt="">
+  </div>
+  
+  <div class="container">
+    <div class="hero-section">
+      <div class="hero-content">
+        <h1 class="hero-title">{{ heroTitle }}</h1>
+        <p class="hero-description" *ngIf="!isMobile">{{ heroDescription }}</p>
+      </div>
+    </div>
+    
+    <div class="sub-heading" *ngIf="isMobile">
+      <p>Connect your accounts, view insights, and explore other options - all in one place</p>
+    </div>
+    
+    <div class="services-grid">
+      <div class="service-item" *ngFor="let service of services">
+        <app-service-card
+          [title]="service.title"
+          [description]="service.description"
+          [iconBgColor]="service.iconColor"
+          [actionText]="service.actionText"
+          [actionLink]="service.actionLink"
+          [locked]="service.locked">
+        </app-service-card>
+      </div>
+    </div>
+    
+    <div class="cta-section">
+      <button class="btn-primary cta-button" (click)="navigateToRegistration()">{{ ctaButtonText }}</button>
+    </div>
+    
+    <div class="footer">
+      <p>{{ footerText }}</p>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,144 @@
+/* Global styles for the Groov application */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Figtree', sans-serif;
+  font-size: $font-base;
+  line-height: 1.5;
+  color: $text-color;
+  background-color: $light-gray;
+}
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Figtree', sans-serif;
+  font-weight: 600;
+  margin-bottom: $spacing-md;
+}
+
+p {
+  margin-bottom: $spacing-md;
+}
+
+a {
+  color: $primary-blue;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  
+  &:hover {
+    color: darken($primary-blue, 10%);
+  }
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 $spacing-md;
+}
+
+/* Button styles */
+button {
+  cursor: pointer;
+  font-family: 'Figtree', sans-serif;
+  font-weight: 500;
+  border: none;
+  outline: none;
+  transition: all 0.3s ease;
+  
+  &:focus {
+    outline: none;
+  }
+}
+
+.btn-primary {
+  background-color: $primary-blue;
+  color: $white;
+  padding: 0.75rem 1.5rem;
+  border-radius: $border-radius-sm;
+  font-weight: 600;
+  
+  &:hover {
+    background-color: darken($primary-blue, 10%);
+  }
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: $primary-blue;
+  padding: 0.75rem 1.5rem;
+  border-radius: $border-radius-sm;
+  border: 0.0625rem solid $primary-blue;
+  font-weight: 600;
+  
+  &:hover {
+    background-color: rgba($primary-blue, 0.05);
+  }
+}
+
+/* Form elements */
+input, select, textarea {
+  font-family: 'Figtree', sans-serif;
+  font-size: $font-base;
+  padding: 0.75rem;
+  border: 0.0625rem solid $medium-gray;
+  border-radius: $border-radius-sm;
+  width: 100%;
+  transition: border-color 0.3s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: $primary-blue;
+  }
+}
+
+label {
+  display: block;
+  margin-bottom: $spacing-sm;
+  font-weight: 500;
+}
+
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+
+.mt-1 { margin-top: $spacing-xs; }
+.mt-2 { margin-top: $spacing-sm; }
+.mt-3 { margin-top: $spacing-md; }
+.mt-4 { margin-top: $spacing-lg; }
+.mt-5 { margin-top: $spacing-xl; }
+
+.mb-1 { margin-bottom: $spacing-xs; }
+.mb-2 { margin-bottom: $spacing-sm; }
+.mb-3 { margin-bottom: $spacing-md; }
+.mb-4 { margin-bottom: $spacing-lg; }
+.mb-5 { margin-bottom: $spacing-xl; }
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Responsive utilities */
+@media (max-width: $breakpoint-md) {
+  .container {
+    padding: 0 $spacing-sm;
+  }
+}

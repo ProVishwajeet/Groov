@@ -1,0 +1,5 @@
+<div class="progress-steps">
+  <div *ngFor="let step of steps" class="step" [ngClass]="{'active': step.active, 'completed': step.completed}">
+    <div class="step-name">{{ step.name }}</div>
+  </div>
+</div>

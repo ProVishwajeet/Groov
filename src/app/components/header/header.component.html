@@ -1,0 +1,18 @@
+<header class="header" [ngClass]="{'registration-header': isRegistrationPage}">
+  <div class="container">
+    <div class="header-content">
+      <div class="logo">
+        <a href="/">
+          <!-- Landing page logos -->
+          <img *ngIf="!isRegistrationPage" src="assets/Logo-white.svg" alt="Groov" class="desktop-logo">
+          <img *ngIf="!isRegistrationPage" src="assets/Logo-dark.svg" alt="Groov" class="mobile-logo">
+          
+          <!-- Registration page logos -->
+          <img *ngIf="isRegistrationPage" src="assets/Logo-white.svg" alt="Groov" class="desktop-logo">
+          <img *ngIf="isRegistrationPage" src="assets/Logo-l2-mobile.svg" alt="Groov" class="mobile-logo">
+        </a>
+      </div>
+      <!-- Envelope icon excluded as per requirement -->
+    </div>
+  </div>
+</header>

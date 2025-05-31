@@ -1,0 +1,62 @@
+@import '../../../assets/scss/variables';
+
+.header {
+  background-color: #1F4D90; // Updated background color as specified
+  height: 5.5rem; // 88px in rem
+  display: flex;
+  align-items: center;
+  
+  &.registration-header {
+    background-color: #1F4D90; // Blue background for registration page
+    
+    @media (max-width: $breakpoint-md) {
+      background-color: #1F4D90; // Keep blue background on mobile for registration page
+    }
+  }
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+  }
+  
+  .logo {
+    a {
+      text-decoration: none;
+      display: block;
+    }
+    
+    img {
+      height: 30px;
+      display: block;
+    }
+    
+    .mobile-logo {
+      display: none;
+    }
+    
+    .desktop-logo {
+      display: block;
+    }
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .header {
+    padding: $spacing-sm 0;
+    background-color: $white;
+    box-shadow: $shadow-sm;
+    
+    .logo {
+      .mobile-logo {
+        display: block;
+      }
+      
+      .desktop-logo {
+        display: none;
+      }
+    }
+  }
+}
