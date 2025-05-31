@@ -5,6 +5,7 @@
   height: 5.5rem; // 88px in rem
   display: flex;
   align-items: center;
+  border-bottom: 1px solid #FFFFFF1A;
   
   &.registration-header {
     background-color: #1F4D90; // Blue background for registration page
@@ -29,7 +30,7 @@
     }
     
     img {
-      height: 30px;
+      height: 38px;
       display: block;
     }
     

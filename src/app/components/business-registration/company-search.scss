@@ -1,0 +1,82 @@
+// Company search styling
+.company-search-container {
+  margin-top: 1.5rem;
+  
+  .search-input-container {
+    position: relative;
+    margin-bottom: 1.5rem;
+    
+    .company-search-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #E0E0E0;
+      border-radius: 8px;
+      font-family: 'Figtree', sans-serif;
+      font-size: 0.875rem;
+      
+      &:focus {
+        outline: none;
+        border-color: #437FF3;
+        box-shadow: 0 0 0 2px rgba(67, 127, 243, 0.2);
+      }
+    }
+    
+    .clear-search-btn {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #999;
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+      
+      &:hover {
+        color: #333;
+      }
+    }
+  }
+  
+  .company-results {
+    max-height: 350px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    
+    .company-result-item {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border: 1px solid #E0E0E0;
+      border-radius: 8px;
+      transition: background-color 0.2s ease;
+      background-color: #ffffff;
+      
+      &:hover {
+        background-color: #F5F8FF;
+      }
+      
+      .company-info {
+        h4 {
+          margin: 0;
+          font-family: 'Figtree', sans-serif;
+          font-size: 1rem;
+          font-weight: 600;
+          color: #333;
+          margin-bottom: 0.5rem;
+        }
+        
+        p {
+          margin: 0;
+          font-family: 'Figtree', sans-serif;
+          font-size: 0.875rem;
+          color: #666;
+          line-height: 1.2;
+        }
+      }
+    }
+  }
+}

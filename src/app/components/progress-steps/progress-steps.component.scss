@@ -9,10 +9,22 @@ $breakpoint-md: 768px;
   flex-direction: column;
   gap: 1.5rem;
   padding: 1.5rem 0;
+  position: relative;
+  
+  /* Vertical line connecting steps */
+  &:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    /* background-color removed */
+  }
   
   .step {
     position: relative;
-    padding-left: 1.5rem;
+    padding-left: 1rem;
     color: rgba(255, 255, 255, 0.6);
     font-family: 'Figtree', sans-serif;
     font-size: 1rem;
@@ -21,33 +33,35 @@ $breakpoint-md: 768px;
     cursor: pointer;
     transition: all 0.3s ease;
     
+    /* No circles, just text */
     &:before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0.25rem;
-      width: 1rem;
-      height: 1rem;
-      border-radius: 50%;
-      border: 0.125rem solid rgba(255, 255, 255, 0.4);
-      background-color: transparent;
+      display: none; /* Remove the circle */
     }
     
     &.active {
       color: #fff;
-      font-weight: 500;
+      font-weight: 600;
       
-      &:before {
-        border-color: #fff;
-        background-color: #437FF3;
+      /* Active step vertical line indicator */
+      &:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 3px;
+        background-color: #fff;
+        border-radius: 1.5px;
       }
     }
     
     &.completed {
-      &:before {
-        border-color: #fff;
-        background-color: #fff;
-      }
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    /* Add spacing between steps */
+    &:not(:last-child) {
+      margin-bottom: 1rem;
     }
   }
   
