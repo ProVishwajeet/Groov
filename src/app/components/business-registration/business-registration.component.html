@@ -387,22 +387,42 @@
           <div class="form-row">
             <div class="form-group full-width">
               <label>Do You Have Any Existing Loans?</label>
-              <div class="yes-no-options">
-                <div class="yes-no-option" [class.selected]="hasExistingLoans === 'YES'" (click)="selectExistingLoans('YES')">
-                  <div class="radio-button">
-                    <div class="radio-outer">
-                      <div class="radio-inner" *ngIf="hasExistingLoans === 'YES'"></div>
+              <div class="loan-options-container">
+                <div class="loan-option" [class.selected]="hasExistingLoans === 'YES'" (click)="selectExistingLoans('YES')">
+                  <div class="loan-option-header">
+                    <div class="loan-icon">
+                      <img src="assets/Yes-icon.svg" alt="Yes Icon">
+                    </div>
+                    <div class="loan-radio">
+                      <div class="radio-outer">
+                        <div class="radio-inner" *ngIf="hasExistingLoans === 'YES'"></div>
+                      </div>
                     </div>
                   </div>
-                  <div class="option-label">Yes</div>
+                  <div class="loan-option-content">
+                    <div class="loan-option-title">YES</div>
+                    <div class="loan-option-description">
+                      You have an active loan and are currently making repayments.
+                    </div>
+                  </div>
                 </div>
-                <div class="yes-no-option" [class.selected]="hasExistingLoans === 'NO'" (click)="selectExistingLoans('NO')">
-                  <div class="radio-button">
-                    <div class="radio-outer">
-                      <div class="radio-inner" *ngIf="hasExistingLoans === 'NO'"></div>
+                <div class="loan-option" [class.selected]="hasExistingLoans === 'NO'" (click)="selectExistingLoans('NO')">
+                  <div class="loan-option-header">
+                    <div class="loan-icon">
+                      <img src="assets/No-icon.svg" alt="No Icon">
+                    </div>
+                    <div class="loan-radio">
+                      <div class="radio-outer">
+                        <div class="radio-inner" *ngIf="hasExistingLoans === 'NO'"></div>
+                      </div>
                     </div>
                   </div>
-                  <div class="option-label">No</div>
+                  <div class="loan-option-content">
+                    <div class="loan-option-title">NO</div>
+                    <div class="loan-option-description">
+                      You are not repaying any loan at the moment, even if you had one in the past.
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

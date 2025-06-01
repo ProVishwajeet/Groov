@@ -66,7 +66,7 @@ $breakpoint-md: 768px;
 // Turnover/Funding Step Styles
 .turnover-funding-step {
   position: relative;
-  height: 600px;
+  height: 500px;
   display: flex;
   flex-direction: column;
   
@@ -97,11 +97,48 @@ $breakpoint-md: 768px;
     bottom: 0;
     left: 0;
     right: 0;
+    width: 100%;
     display: flex;
-    justify-content: space-between;
-    padding: 16px 0;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
     background-color: #fff;
     border-top: 1px solid #f0f0f0;
+    z-index: 10;
+    
+    @media (max-width: $breakpoint-md) {
+      padding: 0px;
+    }
+    
+    .btn {
+      min-width: 120px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      
+      &.btn-primary {
+        background-color: #437FF3;
+        color: white;
+        border: none;
+        
+        &:hover {
+          background-color: darken(#437FF3, 10%);
+        }
+      }
+      
+      &.btn-outline {
+        background-color: transparent;
+        color: #437FF3;
+        border: 1px solid #437FF3;
+        
+        &:hover {
+          background-color: rgba(67, 127, 243, 0.05);
+        }
+      }
+    }
   }
   
   h2 {
@@ -439,6 +476,111 @@ $breakpoint-md: 768px;
       &.selected {
         border-color: #437FF3;
         background-color: rgba(67, 127, 243, 0.05);
+      }
+    }
+  }
+  
+  // Loan options styling
+  .loan-options-container {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    
+    @media (max-width: $breakpoint-md) {
+      flex-direction: row; // Changed to row for all mobile views
+      gap: 12px;
+    }
+  }
+  
+  .loan-options-container {
+    .loan-option {
+      flex: 1;
+      border: 1px solid #E0E0E0;
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background-color: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      
+      @media (max-width: $breakpoint-md) {
+        min-width: 0; // Allow flex items to shrink below content size
+        padding: 12px;
+      }
+      
+      &:hover {
+        border-color: #437FF3;
+        box-shadow: 0 2px 8px rgba(67, 127, 243, 0.1);
+      }
+      
+      &.selected {
+        border-color: #437FF3;
+        background-color: rgba(67, 127, 243, 0.05);
+      }
+      
+      .loan-option-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        
+        .loan-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #437FF3;
+          
+          svg {
+            width: 24px;
+            height: 24px;
+          }
+        }
+        
+        .loan-radio {
+          .radio-outer {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #437FF3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            
+            .radio-inner {
+              width: 10px;
+              height: 10px;
+              border-radius: 50%;
+              background-color: #437FF3;
+            }
+          }
+        }
+      }
+      
+      .loan-option-content {
+        .loan-option-title {
+          font-weight: 600;
+          font-size: 16px;
+          color: #333333;
+          margin-bottom: 4px;
+          
+          @media (max-width: $breakpoint-md) {
+            font-size: 14px;
+          }
+        }
+        
+        .loan-option-description {
+          font-size: 14px;
+          color: #585858;
+          line-height: 1.4;
+          
+          @media (max-width: $breakpoint-md) {
+            font-size: 12px;
+            line-height: 1.3;
+          }
+        }
       }
     }
   }
@@ -1189,12 +1331,23 @@ $breakpoint-md: 768px;
   
   @media (max-width: $breakpoint-md) {
     display: flex !important;
-    justify-content: space-between;
+    overflow-x: auto;
+    overflow-y: hidden;
     margin-bottom: 1.5rem;
     width: 100%;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    padding-bottom: 8px;
+    gap: 10px;
+    
+    &::-webkit-scrollbar {
+      display: none; /* Chrome, Safari and Opera */
+    }
     
     .tab {
-      flex: 1;
+      flex: 0 0 auto;
+      min-width: 100px;
       background-color: transparent !important;
       color: $white !important;
       padding: 0.75rem 0.5rem;
@@ -1203,7 +1356,7 @@ $breakpoint-md: 768px;
       font-size: 0.875rem;
       font-weight: 500;
       position: relative;
-      margin: 0 0.25rem;
+      margin: 0;
       display: flex;
       flex-direction: column;
       align-items: center;

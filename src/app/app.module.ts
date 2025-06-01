@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -9,6 +9,7 @@ import { LandingComponent } from './components/landing/landing.component';
 import { ServiceCardComponent } from './components/service-card/service-card.component';
 import { BusinessRegistrationComponent } from './components/business-registration/business-registration.component';
 import { ProgressStepsComponent } from './components/progress-steps/progress-steps.component';
+import { SuccessScreenComponent } from './components/success-screen/success-screen.component';
 
 @NgModule({
   declarations: [
@@ -17,12 +18,14 @@ import { ProgressStepsComponent } from './components/progress-steps/progress-ste
     LandingComponent,
     ServiceCardComponent,
     BusinessRegistrationComponent,
-    ProgressStepsComponent
+    ProgressStepsComponent,
+    SuccessScreenComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

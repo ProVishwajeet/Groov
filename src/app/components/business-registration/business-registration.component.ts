@@ -157,7 +157,14 @@ export class BusinessRegistrationComponent implements OnInit {
           return;
         }
         
-        // Move to company name search sub-step
+        // If Sole Trader is selected, skip company name step and go directly to merchant details
+        if (this.selectedBusinessType === 'sole-trader') {
+          this.currentStep = 'merchant-details';
+          this.updateProgressSteps('business-type', true);
+          return;
+        }
+        
+        // For other business types, move to company name search sub-step
         this.businessTypeSubStep = 'company-name';
         this.generateDummyCompanyResults();
       } else if (this.businessTypeSubStep === 'company-name') {
