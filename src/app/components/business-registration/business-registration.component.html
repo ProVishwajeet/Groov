@@ -149,7 +149,10 @@
           <div class="form-row">
             <div class="form-group">
               <label for="phoneNumber">Phone number</label>
-              <input type="tel" id="phoneNumber" [formControl]="phoneNumberControl" placeholder="+44 7911 123456" class="form-control">
+              <div class="phone-input-container">
+                <div class="country-code">UK+44</div>
+                <input type="tel" id="phoneNumber" [formControl]="phoneNumberControl" placeholder="7645 9837" class="form-control phone-input">              
+              </div>
             </div>
             
             <div class="form-group">
