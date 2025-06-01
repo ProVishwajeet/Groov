@@ -1,6 +1,6 @@
 import { Component, HostListener, ViewEncapsulation, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormControl } from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
 
 interface BusinessType {
   id: string;
@@ -23,8 +23,8 @@ interface CompanyResult {
   encapsulation: ViewEncapsulation.None
 })
 export class BusinessRegistrationComponent implements OnInit {
-  currentStep: string = 'business-type';
-  businessTypeSubStep: string = 'entity-type'; // 'entity-type' or 'company-name'
+  currentStep: string = 'business-type'; // 'business-type', 'merchant-details', 'business-address', 'turnover-funding'
+  businessTypeSubStep: string = 'entity-type'; // 'entity-type', 'company-name'
   selectedBusinessType: string = '';
   isMobile: boolean = false;
   welcomeTitle: string = 'Welcome Aboard.';
@@ -32,11 +32,11 @@ export class BusinessRegistrationComponent implements OnInit {
   
   // Form controls for all steps
   searchControl = new FormControl('');
-  firstNameControl = new FormControl('');
-  lastNameControl = new FormControl('');
-  phoneNumberControl = new FormControl('');
-  emailControl = new FormControl('');
-  termsAgreedControl = new FormControl(false);
+  firstNameControl = new FormControl('', Validators.required);
+  lastNameControl = new FormControl('', Validators.required);
+  phoneNumberControl = new FormControl('', Validators.required);
+  emailControl = new FormControl('', [Validators.required, Validators.email]);
+  termsAgreedControl = new FormControl(false, Validators.requiredTrue);
   
   // Business Address form controls
   addressSearchControl = new FormControl('');
@@ -48,8 +48,8 @@ export class BusinessRegistrationComponent implements OnInit {
   
   // Address display state
   hasRegisteredAddress: boolean = false;
-  registeredCompanyName: string = 'Groov Technology Ltd.';
-  registeredCompanyAddress: string = '07227081 - 90 York Road, Woking, Surrey, England, GU22 7XR';
+  registeredCompanyName: string = '';
+  registeredCompanyAddress: string = '';
   
   // Address search results
   showAddressResults: boolean = false;
@@ -61,6 +61,20 @@ export class BusinessRegistrationComponent implements OnInit {
     '202 Pine Drive - Edinburgh, EH1 5GH, United Kingdom',
     '303 Birch Boulevard - Cardiff, CF10 6HJ, United Kingdom'
   ];
+  
+  // Turnover/Funding Need properties
+  turnoverOptions: string[] = ['More than £2M', '£1M - 2M', '£500K - 1M', '£200K - 500K', '£100K - 200K', 'Less than £100K'];
+  fundingOptions: string[] = ['More than £2M', '£1M - 2M', '£500K - 1M', '£200K - 500K', '£100K - 200K', 'Less than £100K'];
+  purposeOptions: string[] = ['Working Capital', 'Equipment Purchase', 'Expansion', 'Inventory', 'Debt Refinancing', 'Other'];
+  selectedTurnover: string = '';
+  selectedFunding: string = '';
+  selectedPurposes: string[] = [];
+  hasExistingLoans: string = '';
+  loanProviderName: string = '';
+  loanAmount: string = '';
+  showTurnoverDropdown: boolean = false;
+  showFundingDropdown: boolean = false;
+  showPurposeDropdown: boolean = false;
   
   showResults: boolean = false;
   companyResults: CompanyResult[] = [];
@@ -134,44 +148,56 @@ export class BusinessRegistrationComponent implements OnInit {
   }
   
   nextStep() {
+    // Handle next step based on current step
     if (this.currentStep === 'business-type') {
       if (this.businessTypeSubStep === 'entity-type') {
         // Check if a business type is selected
-        const selectedType = this.businessTypes.find(type => type.selected);
-        if (selectedType) {
-          if (selectedType.id === 'sole-trader') {
-            // For sole trader, skip company name step and go to merchant details
-            this.currentStep = 'merchant-details';
-          } else {
-            // For other business types, go to company name step
-            this.businessTypeSubStep = 'company-name';
-            // Generate dummy company results
-            this.generateDummyCompanyResults();
-          }
+        if (!this.selectedBusinessType) {
+          alert('Please select a business type to continue.');
+          return;
         }
+        
+        // Move to company name search sub-step
+        this.businessTypeSubStep = 'company-name';
+        this.generateDummyCompanyResults();
       } else if (this.businessTypeSubStep === 'company-name') {
+        // Check if company name is selected
+        if (!this.registeredCompanyName) {
+          alert('Please select a company to continue.');
+          return;
+        }
+        
         // Move to merchant details step
         this.currentStep = 'merchant-details';
-        // Mark business-type step as completed
         this.updateProgressSteps('business-type', true);
       }
     } else if (this.currentStep === 'merchant-details') {
-      // Check if terms are agreed
-      if (this.termsAgreedControl.value) {
-        // Move to business address step
-        this.currentStep = 'business-address';
-        // Mark merchant-details step as completed
-        this.updateProgressSteps('merchant-details', true);
-      } else {
-        alert('Please agree to the terms and conditions to continue.');
+      // Validate merchant details form
+      if (!this.firstNameControl.value || !this.lastNameControl.value || 
+          !this.phoneNumberControl.value || !this.emailControl.value || 
+          !this.termsAgreedControl.value) {
+        alert('Please fill in all required fields and agree to the terms.');
+        return;
       }
+      
+      // Move to business address step
+      this.currentStep = 'business-address';
+      this.updateProgressSteps('merchant-details', true);
     } else if (this.currentStep === 'business-address') {
-      // Validate business address fields
-      if (this.validateBusinessAddress()) {
-        // Move to turnover-funding step (or next step in the flow)
-        this.currentStep = 'turnover-funding';
-        // Mark business-address step as completed
-        this.updateProgressSteps('business-address', true);
+      // Validate business address
+      if (!this.validateBusinessAddress()) {
+        return;
+      }
+      
+      // Mark step as completed and move to turnover/funding step
+      this.updateProgressSteps('business-address', true);
+      this.currentStep = 'turnover-funding';
+      
+      // Set default company details if not already set (for demo purposes)
+      if (!this.registeredCompanyName || !this.registeredCompanyAddress) {
+        this.registeredCompanyName = 'Groov Technology Ltd.';
+        this.registeredCompanyAddress = '07227081 - 90 York Road, Woking, Surrey, England, GU22 7XR';
+        this.hasRegisteredAddress = true;
       }
     } else {
       // For other steps, navigate to landing page for now
@@ -241,6 +267,12 @@ export class BusinessRegistrationComponent implements OnInit {
   editRegisteredAddress() {
     // Toggle to edit mode
     this.hasRegisteredAddress = false;
+    
+    // Navigate to the business address step
+    this.currentStep = 'business-address';
+    
+    // Update progress steps to show we're on the business address step
+    this.updateProgressSteps('business-address', false);
   }
   
   searchCompany() {
@@ -339,28 +371,107 @@ export class BusinessRegistrationComponent implements OnInit {
       return this.currentStep === 'business-address' || this.currentStep === 'turnover-funding';
     } else if (stepId === 'business-address') {
       return this.currentStep === 'turnover-funding';
+    } else if (stepId === 'turnover-funding') {
+      // This would be true if we had a next step after turnover-funding
+      return false;
     }
     return false;
   }
   
   private updateProgressSteps(stepId: string, completed: boolean) {
-    // Get the progress steps component and update the completed status
-    const progressStepsComponent = document.querySelector('app-progress-steps');
-    if (progressStepsComponent) {
-      // Use Angular's way to access the component instance
-      const componentRef = (progressStepsComponent as any).__ngContext__?.find(
-        (node: any) => node && node.constructor && node.constructor.name === 'ProgressStepsComponent'
-      );
-      
-      if (componentRef) {
-        // Update the steps array in the component
-        componentRef.steps.forEach((step: any) => {
-          if (step.id === stepId) {
-            step.completed = completed;
-          }
-        });
-      }
+    // We don't need to manually update the progress steps anymore
+    // The ProgressStepsComponent will handle this through its input binding to currentStep
+    // This is just here for future expansion if needed
+    console.log(`Step ${stepId} completion status: ${completed}`);
+  }
+  
+  // Turnover/Funding Need methods
+  toggleTurnoverDropdown() {
+    this.showTurnoverDropdown = !this.showTurnoverDropdown;
+    this.showFundingDropdown = false;
+    this.showPurposeDropdown = false;
+  }
+  
+  toggleFundingDropdown() {
+    this.showFundingDropdown = !this.showFundingDropdown;
+    this.showTurnoverDropdown = false;
+    this.showPurposeDropdown = false;
+  }
+  
+  togglePurposeDropdown() {
+    this.showPurposeDropdown = !this.showPurposeDropdown;
+    this.showTurnoverDropdown = false;
+    this.showFundingDropdown = false;
+  }
+  
+  selectTurnover(option: string) {
+    this.selectedTurnover = option;
+    this.showTurnoverDropdown = false;
+  }
+  
+  selectFunding(option: string) {
+    this.selectedFunding = option;
+    this.showFundingDropdown = false;
+  }
+  
+  selectPurpose(option: string) {
+    // Check if the option is already selected
+    const index = this.selectedPurposes.indexOf(option);
+    
+    if (index === -1) {
+      // Add the option if not already selected
+      this.selectedPurposes.push(option);
     }
+    
+    // Keep the dropdown open for multiple selections
+  }
+  
+  removePurpose(option: string) {
+    const index = this.selectedPurposes.indexOf(option);
+    if (index !== -1) {
+      this.selectedPurposes.splice(index, 1);
+    }
+  }
+  
+  selectExistingLoans(option: string) {
+    this.hasExistingLoans = option;
+    
+    // Clear loan details if NO is selected
+    if (option === 'NO') {
+      this.loanProviderName = '';
+      this.loanAmount = '';
+    }
+  }
+  
+  submitAndContinue() {
+    // Validate all required fields for this step
+    if (!this.selectedTurnover || !this.selectedFunding || this.selectedPurposes.length === 0 || !this.hasExistingLoans) {
+      alert('Please complete all required fields before continuing.');
+      return;
+    }
+
+    // If user has existing loans, validate loan details
+    if (this.hasExistingLoans === 'YES' && (!this.loanProviderName || !this.loanAmount)) {
+      alert('Please provide loan details before continuing.');
+      return;
+    }
+
+    // Prepare data for submission
+    const turnoverFundingData = {
+      turnover: this.selectedTurnover,
+      fundingAmount: this.selectedFunding,
+      purposes: this.selectedPurposes,
+      hasExistingLoans: this.hasExistingLoans,
+      loanDetails: this.hasExistingLoans === 'YES' ? {
+        providerName: this.loanProviderName,
+        amount: this.loanAmount
+      } : null
+    };
+    
+    console.log('Submitting funding data:', turnoverFundingData);
+    
+    // For now, just show a success message
+    alert('Thank you for your submission! We will be in touch soon.');
   }
   
   private generateDummyCompanyResults(): CompanyResult[] {

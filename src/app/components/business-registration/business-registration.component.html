@@ -53,6 +53,19 @@
           </div>
           <div class="tab-text">Business<br>Address</div>
         </div>
+        <div class="tab" [ngClass]="{'active': currentStep === 'turnover-funding', 'completed': isStepCompleted('turnover-funding')}" 
+             [style.background-color]="currentStep === 'turnover-funding' ? '#FFFFFF' : 'transparent'" 
+             [style.color]="currentStep === 'turnover-funding' ? '#3D3D3D' : '#FFFFFF'"
+             [style.font-family]="currentStep === 'turnover-funding' ? 'Figtree, sans-serif' : ''"
+             [style.font-weight]="currentStep === 'turnover-funding' ? '600' : ''">
+          <div class="tab-bullet" 
+               [style.background-color]="isStepCompleted('turnover-funding') ? '#FFFFFF' : 
+                                       (currentStep === 'turnover-funding' ? '#FFFFFF' : 'transparent')"
+               [style.border]="'1px solid #FFFFFF'">
+            <img *ngIf="isStepCompleted('turnover-funding')" src="assets/completed-icon.svg" alt="Completed" class="completed-icon">
+          </div>
+          <div class="tab-text">Turnover/<br>Funding</div>
+        </div>
       </div>
       <div class="content-container">
       <!-- Progress bullet horizontal line above heading -->
@@ -149,10 +162,7 @@
           <div class="form-row">
             <div class="form-group">
               <label for="phoneNumber">Phone number</label>
-              <div class="phone-input-container">
-                <div class="country-code">UK+44</div>
-                <input type="tel" id="phoneNumber" [formControl]="phoneNumberControl" placeholder="7645 9837" class="form-control phone-input">              
-              </div>
+              <input type="tel" id="phoneNumber" [formControl]="phoneNumberControl" placeholder="UK+44 | 76459837" class="form-control">
             </div>
             
             <div class="form-group">
@@ -215,7 +225,7 @@
                        placeholder="Search by Post Code, Town/City, full address..." 
                        class="address-search-input">
                 <div class="dropdown-icon">
-                  <img src="assets/down-arrow.svg" alt="Dropdown" class="down-arrow-icon">
+                  <img src="assets/Down-Arrow-final.svg" alt="Dropdown" class="down-arrow-icon">
                 </div>
               </div>
               
@@ -271,6 +281,157 @@
         <div class="button-group">
           <button class="btn btn-outline" (click)="cancel()">BACK</button>
           <button class="btn btn-primary" (click)="nextStep()">NEXT</button>
+        </div>
+      </div>
+      
+      <!-- Turnover and Funding Need Form -->
+      <div *ngIf="currentStep === 'turnover-funding'" class="step-content turnover-funding-step">
+        <div class="scrollable-content">
+          <h2>Turnover and your funding needs</h2>
+          <p class="step-description">Let's chat about your funding needs. Tell us a bit about yourself and what you're looking for</p>
+          
+          <!-- Registered Company Display -->
+          <div class="registered-company-box">
+            <div class="company-info">
+              <div class="company-icon">
+                <img src="assets/briefcase-01.svg" alt="Briefcase Icon">
+              </div>
+              <div class="company-details">
+                <div class="company-name">{{registeredCompanyName}}</div>
+                <div class="company-address">{{registeredCompanyAddress}}</div>
+              </div>
+            </div>
+            <div class="edit-icon" (click)="editRegisteredAddress()">
+              <img src="assets/edit-05.svg" alt="Edit Icon">
+            </div>
+          </div>
+          
+          <!-- Turnover and Funding Amount Dropdowns (Side by Side) -->
+          <div class="form-row two-columns">
+            <!-- Turnover Dropdown -->
+            <div class="form-group half-width">
+              <label>Your Average Monthly Turnover (£)?</label>
+              <div class="custom-dropdown" [class.active]="showTurnoverDropdown">
+                <div class="dropdown-toggle" (click)="toggleTurnoverDropdown()">
+                  <span *ngIf="!selectedTurnover">Select amount</span>
+                  <span *ngIf="selectedTurnover">{{selectedTurnover}}</span>
+                  <div class="dropdown-icon">
+                    <img src="assets/Down-Arrow-final.svg" alt="Dropdown" class="down-arrow-icon">
+                  </div>
+                </div>
+                <div class="dropdown-menu" *ngIf="showTurnoverDropdown">
+                  <div class="dropdown-item" *ngFor="let option of turnoverOptions" (click)="selectTurnover(option)">
+                    {{option}}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Funding Amount Dropdown -->
+            <div class="form-group half-width">
+              <label>How Much Are You Looking For (£)?</label>
+              <div class="custom-dropdown" [class.active]="showFundingDropdown">
+                <div class="dropdown-toggle" (click)="toggleFundingDropdown()">
+                  <span *ngIf="!selectedFunding">Select amount</span>
+                  <span *ngIf="selectedFunding">{{selectedFunding}}</span>
+                  <div class="dropdown-icon">
+                    <img src="assets/Down-Arrow-final.svg" alt="Dropdown" class="down-arrow-icon">
+                  </div>
+                </div>
+                <div class="dropdown-menu" *ngIf="showFundingDropdown">
+                  <div class="dropdown-item" *ngFor="let option of fundingOptions" (click)="selectFunding(option)">
+                    {{option}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Funding Purpose Dropdown -->
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>What's The Funding For?</label>
+              <div class="custom-dropdown" [class.active]="showPurposeDropdown">
+                <div class="dropdown-toggle" (click)="togglePurposeDropdown()">
+                  <span *ngIf="selectedPurposes.length === 0">Select purpose</span>
+                  <span *ngIf="selectedPurposes.length > 0">{{selectedPurposes.length}} selected</span>
+                  <div class="dropdown-icon">
+                    <img src="assets/Down-Arrow-final.svg" alt="Dropdown" class="down-arrow-icon">
+                  </div>
+                </div>
+                <div class="dropdown-menu" *ngIf="showPurposeDropdown">
+                  <div class="dropdown-item" *ngFor="let option of purposeOptions" (click)="selectPurpose(option)" [class.selected]="selectedPurposes.includes(option)">
+                    {{option}}
+                    <div class="checkbox" [class.checked]="selectedPurposes.includes(option)">
+                      <svg *ngIf="selectedPurposes.includes(option)" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Selected options with close icons -->
+              <div class="selected-options" *ngIf="selectedPurposes.length > 0">
+                <div class="selected-option" *ngFor="let option of selectedPurposes">
+                  {{option}}
+                  <span class="close-icon" (click)="removePurpose(option)">
+                    <img src="assets/remove-icon.svg" alt="Remove">
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Do You Have Any Existing Loans? -->
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>Do You Have Any Existing Loans?</label>
+              <div class="yes-no-options">
+                <div class="yes-no-option" [class.selected]="hasExistingLoans === 'YES'" (click)="selectExistingLoans('YES')">
+                  <div class="radio-button">
+                    <div class="radio-outer">
+                      <div class="radio-inner" *ngIf="hasExistingLoans === 'YES'"></div>
+                    </div>
+                  </div>
+                  <div class="option-label">Yes</div>
+                </div>
+                <div class="yes-no-option" [class.selected]="hasExistingLoans === 'NO'" (click)="selectExistingLoans('NO')">
+                  <div class="radio-button">
+                    <div class="radio-outer">
+                      <div class="radio-inner" *ngIf="hasExistingLoans === 'NO'"></div>
+                    </div>
+                  </div>
+                  <div class="option-label">No</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Additional fields shown only when YES is selected -->
+          <div class="additional-fields" *ngIf="hasExistingLoans === 'YES'">
+            <div class="form-row">
+              <div class="form-group full-width">
+                <label>Loan Provider Name</label>
+                <input type="text" class="form-control" placeholder="Enter name" [(ngModel)]="loanProviderName">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group full-width">
+                <label>Loan Amount (£)</label>
+                <input type="text" class="form-control" placeholder="Enter amount" [(ngModel)]="loanAmount">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Add padding at the bottom to ensure content doesn't get hidden behind the fixed button group -->
+          <div class="bottom-padding"></div>
+        </div>
+        
+        <!-- Navigation Buttons (outside scrollable content) -->
+        <div class="button-group">
+          <button class="btn btn-outline" (click)="cancel()">BACK</button>
+          <button class="btn btn-primary" (click)="submitAndContinue()">SUBMIT AND CONTINUE</button>
         </div>
       </div>
     </div>
