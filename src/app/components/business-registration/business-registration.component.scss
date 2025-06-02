@@ -11,6 +11,36 @@ $breakpoint-md: 768px;
 // Import company search styles
 @import './company-search.scss';
 
+// Global form control styling for all business registration steps
+.form-control, select, input[type="text"], textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #D6D6D6;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: $dark-gray;
+  background-color: #FAFAFA;
+  transition: border-color 0.2s ease;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  
+  &:focus {
+    outline: none;
+    border-color: $light-blue;
+  }
+  
+  &::placeholder {
+    color: #607087;
+  }
+}
+
+// Specific styling for textareas
+textarea.form-control, .address-textarea {
+  resize: none;
+  min-height: 80px;
+}
+
 // Merchant Details Form Styles
 .merchant-details-form {
   margin-bottom: 1.5rem;
@@ -40,10 +70,11 @@ $breakpoint-md: 768px;
     .form-control {
       width: 100%;
       padding: 0.75rem 1rem;
-      border: 1px solid #E0E0E0;
+      border: 1px solid #D6D6D6;
       border-radius: 0.5rem;
       font-size: 0.875rem;
       color: $dark-gray;
+      background-color: #FAFAFA;
       transition: border-color 0.2s ease;
       
       &:focus {
@@ -52,7 +83,12 @@ $breakpoint-md: 768px;
       }
       
       &::placeholder {
-        color: #9E9E9E;
+        color: #607087;
+      }
+      
+      &.address-textarea {
+        resize: none;
+        min-height: 80px;
       }
     }
   }
@@ -736,15 +772,20 @@ $breakpoint-md: 768px;
         width: 100%;
         padding: 0.75rem 1rem;
         padding-right: 2.5rem;
-        border: 1px solid #E0E0E0;
+        border: 1px solid #D6D6D6;
         border-radius: 0.5rem;
         font-size: 0.875rem;
         color: $dark-gray;
+        background-color: #FAFAFA;
         transition: border-color 0.2s ease;
         
         &:focus {
           outline: none;
           border-color: $light-blue;
+        }
+        
+        &::placeholder {
+          color: #607087;
         }
       }
       

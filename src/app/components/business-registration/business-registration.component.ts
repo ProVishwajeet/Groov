@@ -224,6 +224,9 @@ export class BusinessRegistrationComponent implements OnInit {
     } else if (this.currentStep === 'business-address') {
       // Go back to merchant details step
       this.currentStep = 'merchant-details';
+    } else if (this.currentStep === 'turnover-funding') {
+      // Go back to business address step
+      this.currentStep = 'business-address';
     } else if (this.businessTypeSubStep === 'company-name') {
       // Go back to entity type selection
       this.businessTypeSubStep = 'entity-type';
