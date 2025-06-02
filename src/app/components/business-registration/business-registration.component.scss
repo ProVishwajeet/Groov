@@ -8,8 +8,9 @@ $medium-gray: #e6e6e6;
 $dark-gray: #333333;
 $breakpoint-md: 768px;
 
-// Import company search styles
+// Import styles
 @import './company-search.scss';
+@import './business-registration.modal.scss';
 
 // Global form control styling for all business registration steps
 .form-control, select, input[type="text"], textarea {
@@ -102,7 +103,7 @@ textarea.form-control, .address-textarea {
 // Turnover/Funding Step Styles
 .turnover-funding-step {
   position: relative;
-  height: 500px;
+  height: 100%;
   display: flex;
   flex-direction: column;
   
@@ -661,6 +662,52 @@ textarea.form-control, .address-textarea {
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+  
+  // Success screen styles
+  .success-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    width: 100%;
+    min-height: 400px;
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  .success-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .success-icon {
+    margin-bottom: 24px;
+  }
+  
+  .success-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #333;
+  }
+  
+  .success-message {
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 32px;
+    color: #666;
+  }
+  
+  .success-button {
+    min-width: 250px;
+    margin-top: 16px;
+    text-transform: uppercase;
+    font-weight: 600;
   }
   
   // Button styling

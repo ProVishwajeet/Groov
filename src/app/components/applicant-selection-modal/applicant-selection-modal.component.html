@@ -1,0 +1,36 @@
+<div class="modal-overlay" *ngIf="visible">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>Select Applicant</h2>
+      <button class="close-button" (click)="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="applicant-list">
+        <div *ngFor="let officer of officers" class="applicant-item" (click)="selectOfficer(officer)">
+          <div class="applicant-icon">
+            <i class="user-icon"></i>
+          </div>
+          <div class="applicant-info">
+            <h4>{{officer.name}}</h4>
+            <p *ngIf="officer.email">{{officer.email}}</p>
+          </div>
+          <div class="applicant-arrow">
+            <i class="arrow-right"></i>
+          </div>
+        </div>
+        <div class="applicant-item" (click)="selectNone()">
+          <div class="applicant-icon">
+            <i class="user-icon"></i>
+          </div>
+          <div class="applicant-info">
+            <h4>None of above</h4>
+            <p>Submit</p>
+          </div>
+          <div class="applicant-arrow">
+            <i class="arrow-right"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

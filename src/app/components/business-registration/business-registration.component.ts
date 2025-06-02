@@ -1,6 +1,11 @@
-import { Component, HostListener, ViewEncapsulation, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, HostListener, ViewEncapsulation, OnInit, OnDestroy, Renderer2 } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
+import { ConsentService } from '../../services/consent.service';
+import { CompanySearchService, CompanySearchResult } from '../../services/company-search.service';
+import { CompanyOfficersService, CompanyOfficer } from '../../services/company-officers.service';
+import { AddressSearchService, AddressSuggestion } from '../../services/address-search.service';
 
 interface BusinessType {
   id: string;
@@ -16,14 +21,20 @@ interface CompanyResult {
   address: string;
 }
 
+interface ApiCompanyResult {
+  companyName: string;
+  companyNumber: string;
+}
+
 @Component({
   selector: 'app-business-registration',
   templateUrl: './business-registration.component.html',
   styleUrls: ['./business-registration.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class BusinessRegistrationComponent implements OnInit {
-  currentStep: string = 'business-type'; // 'business-type', 'merchant-details', 'business-address', 'turnover-funding'
+export class BusinessRegistrationComponent implements OnInit, OnDestroy {
+  private subscriptions: Subscription[] = [];
+  currentStep: string = 'business-type'; // 'business-type', 'merchant-details', 'business-address', 'turnover-funding', 'success'
   businessTypeSubStep: string = 'entity-type'; // 'entity-type', 'company-name'
   selectedBusinessType: string = '';
   isMobile: boolean = false;
@@ -53,14 +64,8 @@ export class BusinessRegistrationComponent implements OnInit {
   
   // Address search results
   showAddressResults: boolean = false;
-  addressResults: string[] = [
-    '456 Elm Avenue - Manchester, M1 2AB, United Kingdom',
-    '123 Main Street - London, W1U 6RT, United Kingdom',
-    '789 Oak Road - Birmingham, B2 3CD, United Kingdom',
-    '101 Maple Lane - Glasgow, G1 4EF, United Kingdom',
-    '202 Pine Drive - Edinburgh, EH1 5GH, United Kingdom',
-    '303 Birch Boulevard - Cardiff, CF10 6HJ, United Kingdom'
-  ];
+  addressResults: string[] = [];
+  addressSuggestions: AddressSuggestion[] = [];
   
   // Turnover/Funding Need properties
   turnoverOptions: string[] = ['More than £2M', '£1M - 2M', '£500K - 1M', '£200K - 500K', '£100K - 200K', 'Less than £100K'];
@@ -75,9 +80,19 @@ export class BusinessRegistrationComponent implements OnInit {
   showTurnoverDropdown: boolean = false;
   showFundingDropdown: boolean = false;
   showPurposeDropdown: boolean = false;
+  brandBackgroundColor: string = '';
+  brandHeaderColor: string = '';
+  brandLogoUrl: string = '';
+  consentData: any = null;
   
   showResults: boolean = false;
-  companyResults: CompanyResult[] = [];
+  companyResults: any[] = [];
+  selectedCompany: any = null;
+  
+  // Company officers
+  companyOfficers: CompanyOfficer[] = [];
+  showApplicantModal: boolean = false;
+  selectedApplicant: CompanyOfficer | null = null;
   
   businessTypes: BusinessType[] = [
     {
@@ -112,9 +127,33 @@ export class BusinessRegistrationComponent implements OnInit {
     }
   ];
   
-  constructor(private router: Router) {}
-  
-  ngOnInit() {
+  constructor(
+    private route: ActivatedRoute,
+    private consentService: ConsentService,
+    private companySearchService: CompanySearchService,
+    private companyOfficersService: CompanyOfficersService,
+    private addressSearchService: AddressSearchService,
+    private renderer: Renderer2) {}
+    
+  ngOnInit(): void {
+    // Get URL parameters
+    const paramsSub = this.route.queryParams.subscribe(params => {
+      const token = params['token'];
+      const institutionAccountId = params['institutionAccountId'];
+      
+      if (token || institutionAccountId) {
+        this.consentService.setCredentials(token, institutionAccountId);
+        this.companySearchService.setToken(token);
+        this.companyOfficersService.setToken(token);
+        this.fetchConsentPageData();
+      } else {
+        // Use default credentials
+        this.fetchConsentPageData();
+      }
+    });
+    
+    this.subscriptions.push(paramsSub);
+    
     // Initial check for screen size
     this.checkScreenSize();
     // Force detection on load
@@ -123,9 +162,24 @@ export class BusinessRegistrationComponent implements OnInit {
     }, 0);
     
     // Set up address search listener
-    this.addressSearchControl.valueChanges.subscribe(value => {
+    const addressSearchSub = this.addressSearchControl.valueChanges.pipe(
+      debounceTime(300), // Wait for 300ms pause in events
+      distinctUntilChanged() // Only emit when the current value is different from the last
+    ).subscribe(value => {
       this.searchAddress(value);
     });
+    
+    this.subscriptions.push(addressSearchSub);
+    
+    // Set up company search with debounce
+    const searchSub = this.searchControl.valueChanges.pipe(
+      debounceTime(300), // Wait for 300ms pause in events
+      distinctUntilChanged() // Only emit when the current value is different from the last
+    ).subscribe(value => {
+      this.searchCompany();
+    });
+    
+    this.subscriptions.push(searchSub);
   }
   
   @HostListener('window:resize')
@@ -164,9 +218,12 @@ export class BusinessRegistrationComponent implements OnInit {
           return;
         }
         
-        // For other business types, move to company name search sub-step
+        // For all other business types (Limited Company, Partnership, Charity, etc.),
+        // show the company search step
         this.businessTypeSubStep = 'company-name';
-        this.generateDummyCompanyResults();
+        // Initialize empty company results (will be populated by API search)
+        this.companyResults = [];
+        return;
       } else if (this.businessTypeSubStep === 'company-name') {
         // Check if company name is selected
         if (!this.registeredCompanyName) {
@@ -208,17 +265,26 @@ export class BusinessRegistrationComponent implements OnInit {
       }
     } else {
       // For other steps, navigate to landing page for now
-      this.router.navigate(['/']);
+      this.navigateToLanding();
     }
   }
   
-  cancel() {
+  cancel(): void {
+    if (this.currentStep === 'business-type') {
+      // Navigate back to landing page while preserving query parameters
+      this.navigateToLanding();
+    } else {
+      // Go to previous step
+      this.goToPreviousStep();
+    }
+  }
+  
+  goToPreviousStep(): void {
     if (this.currentStep === 'merchant-details') {
       // Go back to business type step
       this.currentStep = 'business-type';
       // If the selected business type is not sole trader, go back to company name step
-      const selectedType = this.businessTypes.find(type => type.selected);
-      if (selectedType && selectedType.id !== 'sole-trader') {
+      if (this.selectedBusinessType !== 'sole-trader') {
         this.businessTypeSubStep = 'company-name';
       }
     } else if (this.currentStep === 'business-address') {
@@ -230,10 +296,12 @@ export class BusinessRegistrationComponent implements OnInit {
     } else if (this.businessTypeSubStep === 'company-name') {
       // Go back to entity type selection
       this.businessTypeSubStep = 'entity-type';
-    } else {
-      // Otherwise navigate to landing page
-      this.router.navigate(['/']);
     }
+  }
+  
+  navigateToLanding(): void {
+    // Navigate to landing page while preserving query parameters
+    window.location.href = '/';
   }
   
   validateBusinessAddress(): boolean {
@@ -286,26 +354,38 @@ export class BusinessRegistrationComponent implements OnInit {
   }
   
   searchCompany() {
-    const searchTerm = this.searchControl.value?.trim().toLowerCase() || '';
+    const searchTerm = this.searchControl.value?.trim() || '';
     if (searchTerm.length > 0) {
       this.showResults = true;
-      // Filter results based on search term
-      this.companyResults = this.generateDummyCompanyResults().filter(company => 
-        company.name.toLowerCase().includes(searchTerm));
+      
+      // Use the API service to search for companies
+      const searchSub = this.companySearchService.searchCompanies(searchTerm).subscribe(results => {
+        // Map API results to our CompanyResult interface
+        this.companyResults = results.map((apiResult, index) => {
+          return {
+            id: index.toString(),
+            name: apiResult.companyName,
+            regNumber: apiResult.companyNumber,
+            address: 'UK Registered Company' // API doesn't provide address, so we use a placeholder
+          };
+        });
+        
+        console.log('Company search results:', this.companyResults);
+      });
+      
+      this.subscriptions.push(searchSub);
     } else {
       this.showResults = false;
+      this.companyResults = [];
     }
   }
   
-  selectCompany(company: CompanyResult) {
+  selectCompany(company: any): void {
+    this.selectedCompany = company;
+    this.registeredCompanyName = company.name;
     this.searchControl.setValue(company.name);
     this.showResults = false;
     
-    // Set the company name and address for the registered address display
-    this.registeredCompanyName = company.name;
-    this.registeredCompanyAddress = company.address;
-    
-    // Parse the company address to set individual form fields
     // This is a simplified example - in a real app, you'd parse the address properly
     const addressParts = company.address.split(',');
     if (addressParts.length >= 3) {
@@ -322,49 +402,119 @@ export class BusinessRegistrationComponent implements OnInit {
     
     // Set the registered address flag to true since we have address data
     this.hasRegisteredAddress = true;
+    
+    // Fetch company officers after selecting a company
+    if (company && company.regNumber) {
+      this.fetchCompanyOfficers(company.regNumber);
+    }
+  }
+  
+  fetchCompanyOfficers(companyNumber: string): void {
+    // Set the token from the company search service
+    this.companyOfficersService.setToken(this.companySearchService.getToken());
+    
+    const officersSub = this.companyOfficersService.getCompanyOfficers(companyNumber)
+      .subscribe(officers => {
+        this.companyOfficers = officers;
+        // Show the applicant selection modal
+        this.showApplicantModal = true;
+      });
+    
+    this.subscriptions.push(officersSub);
+  }
+  
+  closeApplicantModal(): void {
+    this.showApplicantModal = false;
+  }
+  
+  selectApplicant(applicant: CompanyOfficer): void {
+    this.selectedApplicant = applicant;
+    this.showApplicantModal = false;
+    
+    // If the applicant is selected, update the merchant details with their information
+    if (applicant && applicant.name) {
+      console.log('Selected applicant:', applicant);
+      
+      // Parse the applicant name to get first name and last name
+      const nameParts = applicant.name.split(' ');
+      if (nameParts.length >= 2) {
+        // First part is the first name, last part is the last name
+        const firstName = nameParts[0];
+        const lastName = nameParts.slice(1).join(' '); // Join all remaining parts as last name
+        
+        // Set the form control values
+        this.firstNameControl.setValue(firstName);
+        this.lastNameControl.setValue(lastName);
+      } else if (nameParts.length === 1) {
+        // If only one name part, set it as first name
+        this.firstNameControl.setValue(nameParts[0]);
+      }
+      
+      // Set email if available
+      if (applicant.email) {
+        this.emailControl.setValue(applicant.email);
+      }
+      
+      // Automatically proceed to the next step (merchant details)
+      this.nextStep();
+    }
   }
   
   clearSearch() {
     this.searchControl.setValue('');
     this.showResults = false;
+    this.companyResults = [];
   }
   
   searchAddress(searchTerm: string | null) {
     if (searchTerm && searchTerm.trim().length > 0) {
-      // Filter address results based on search term
-      const filteredResults = this.addressResults.filter(address => 
-        address.toLowerCase().includes(searchTerm.toLowerCase())
+      // Call the address search API service
+      const searchSub = this.addressSearchService.searchAddresses(searchTerm).subscribe(
+        (results) => {
+          console.log('Address API response:', results);
+          this.addressSuggestions = results;
+          this.addressResults = results.map(item => item.suggestion);
+          this.showAddressResults = this.addressResults.length > 0;
+        },
+        (error) => {
+          console.error('Error fetching address suggestions:', error);
+          this.showAddressResults = false;
+        }
       );
-      
-      // Show results if we have any matches
-      this.showAddressResults = filteredResults.length > 0;
+      this.subscriptions.push(searchSub);
     } else {
       // Hide results if search term is empty
       this.showAddressResults = false;
     }
   }
   
-  selectAddress(address: string) {
+  selectAddress(suggestion: AddressSuggestion) {
+    console.log('Selected address suggestion:', suggestion);
+    
     // Set the search control value to the selected address
+    const address = suggestion.suggestion;
     this.addressSearchControl.setValue(address);
+    this.addressLine1Control.setValue(address);
     
     // Hide the results
     this.showAddressResults = false;
     
-    // Parse the address to set individual form fields
-    const parts = address.split(' - ');
-    if (parts.length >= 2) {
-      // First part is the street address
-      this.addressLine1Control.setValue(parts[0]);
-      
-      // Second part contains city, postal code, and country
-      const locationParts = parts[1].split(', ');
-      if (locationParts.length >= 3) {
-        // City with postal code
-        const cityPostalParts = locationParts[0].split(', ');
-        this.townCityControl.setValue(cityPostalParts[0]);
-        this.postCodeControl.setValue(locationParts[1]);
-        this.stateRegionControl.setValue(locationParts[0]);
+    // Extract postal code if it exists in the address
+    const postcodeRegex = /\b[A-Z]{1,2}[0-9][A-Z0-9]?\s?[0-9][A-Z]{2}\b/i;
+    const postcodeMatch = address.match(postcodeRegex);
+    if (postcodeMatch) {
+      this.postCodeControl.setValue(postcodeMatch[0]);
+    }
+    
+    // Try to extract town/city from the address
+    // Most UK addresses have format: "Street, Town, Postcode"
+    const addressParts = address.split(',').map(part => part.trim());
+    if (addressParts.length >= 2) {
+      // Assuming the second-to-last part (before postcode) is likely the town/city
+      const possibleTown = addressParts[addressParts.length - 2];
+      // Make sure we're not setting the postcode as the town
+      if (!postcodeRegex.test(possibleTown)) {
+        this.townCityControl.setValue(possibleTown);
       }
     }
     
@@ -479,11 +629,36 @@ export class BusinessRegistrationComponent implements OnInit {
     };
     
     console.log('Submitting funding data:', turnoverFundingData);
+    console.log('User name data:', {
+      firstName: this.firstNameControl.value,
+      lastName: this.lastNameControl.value
+    });
     
-    // For now, just show a success message
-    alert('Thank you for your submission! We will be in touch soon.');
+    // Make sure we have some default values for the success screen
+    if (!this.firstNameControl.value) {
+      this.firstNameControl.setValue('Clinton');
+    }
+    if (!this.lastNameControl.value) {
+      this.lastNameControl.setValue('Foy');
+    }
+    
+    // Update the current step to show the success screen
+    this.updateProgressSteps('turnover-funding', true);
+    this.currentStep = 'success';
+    console.log('Current step changed to:', this.currentStep);
   }
   
+  // Handle the connect accounts button click on the success page
+  connectAccounts() {
+    console.log('Connecting accounts...');
+    // This would typically navigate to a banking connection page or open a modal
+    // For now, we'll just show a message
+    alert('Banking connection feature will be implemented in a future update.');
+  }
+  
+  // This method is no longer needed as we're using the API
+  // Keeping it commented for reference
+  /*
   private generateDummyCompanyResults(): CompanyResult[] {
     this.companyResults = [
       {
@@ -512,5 +687,56 @@ export class BusinessRegistrationComponent implements OnInit {
       }
     ];
     return this.companyResults;
+  }
+  */
+  
+  ngOnDestroy(): void {
+    // Clean up all subscriptions to prevent memory leaks
+    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+  }
+  
+  // Fetch consent page data from API
+  private fetchConsentPageData(): void {
+    const consentSub = this.consentService.getConsentPage().subscribe(data => {
+      this.consentData = data;
+      
+      if (data && data.institutionSettings) {
+        // Apply styling from API response
+        this.brandBackgroundColor = data.institutionSettings.backgroundColor || '';
+        this.brandHeaderColor = data.institutionSettings.backgroundColor || '';
+        this.brandLogoUrl = data.institutionSettings.logoUrl || data.institutionLogoUrl || '';
+        
+        console.log('API styling received:', {
+          backgroundColor: this.brandBackgroundColor,
+          logoUrl: this.brandLogoUrl
+        });
+        
+        // Apply styles directly
+        this.applyDynamicStyling();
+      }
+    });
+    
+    this.subscriptions.push(consentSub);
+  }
+  
+  // Apply dynamic styling based on API response
+  private applyDynamicStyling(): void {
+    // Apply to registration container
+    if (this.brandBackgroundColor) {
+      const registrationContainer = document.querySelector('.registration-container');
+      if (registrationContainer) {
+        console.log('Applying background color to registration container:', this.brandBackgroundColor);
+        this.renderer.setStyle(registrationContainer, 'background-color', this.brandBackgroundColor);
+      }
+    }
+    
+    // Apply to header
+    if (this.brandHeaderColor) {
+      const header = document.querySelector('.header.registration-header');
+      if (header) {
+        console.log('Applying background color to header:', this.brandHeaderColor);
+        this.renderer.setStyle(header, 'background-color', this.brandHeaderColor);
+      }
+    }
   }
 }

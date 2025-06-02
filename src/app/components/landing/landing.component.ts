@@ -1,5 +1,6 @@
-import { Component, OnInit, HostListener } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ProductFeaturesService } from '../../services/product-features.service';
 
 interface ServiceCard {
@@ -17,8 +18,9 @@ interface ServiceCard {
   templateUrl: './landing.component.html',
   styleUrls: ['./landing.component.scss']
 })
-export class LandingComponent implements OnInit {
-  constructor(private router: Router, private productFeaturesService: ProductFeaturesService) {}
+export class LandingComponent implements OnInit, OnDestroy {
+  private subscriptions: Subscription[] = [];
+  
   // Hero section
   heroTitle: string = 'Unlock your business potential';
   heroDescription: string = 'Tell us about your business and connect you bank account and explore business finance.';
@@ -40,6 +42,12 @@ export class LandingComponent implements OnInit {
   services: ServiceCard[] = [];
   isMobile: boolean = false;
   
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private productFeaturesService: ProductFeaturesService
+  ) { }
+  
   @HostListener('window:resize', ['$event'])
   onResize() {
     this.checkScreenSize();
@@ -60,12 +68,30 @@ export class LandingComponent implements OnInit {
   }
   
   ngOnInit(): void {
-    // Check if broking service is enabled via API
-    this.productFeaturesService.isBrokingServiceEnabled().subscribe(enabled => {
-      this.brokingServiceEnabled = enabled;
-      this.checkScreenSize(); // Update services list based on broking service status
+    // Get URL parameters and subscribe to changes
+    const queryParamsSub = this.route.queryParams.subscribe(params => {
+      console.log('URL parameters:', params);
+      
+      const token = params['token'];
+      const institutionAccountId = params['institutionAccountId'];
+      
+      if (token || institutionAccountId) {
+        // Update service with URL parameters
+        this.productFeaturesService.setCredentials(token, institutionAccountId);
+        console.log('URL parameters applied to service');
+      }
+      
+      // Initialize service data
+      this.initializeServiceData();
+      
+      // Check feature status via API after applying URL parameters
+      this.checkFeatureStatus();
     });
     
+    this.subscriptions.push(queryParamsSub);
+  }
+  
+  private initializeServiceData(): void {
     // Initialize desktop services data
     this.desktopServices = [
       {
@@ -74,7 +100,7 @@ export class LandingComponent implements OnInit {
         iconColor: '#3e7bea', // Blue
         actionText: 'READ MORE',
         actionLink: '#',
-        locked: true,
+        locked: false,
         type: 'accounts'
       },
       {
@@ -83,7 +109,7 @@ export class LandingComponent implements OnInit {
         iconColor: '#3ca1c9', // Light blue
         actionText: 'READ MORE',
         actionLink: '#',
-        locked: true,
+        locked: false,
         type: 'insights'
       },
       {
@@ -92,12 +118,12 @@ export class LandingComponent implements OnInit {
         iconColor: '#ff7a00', // Orange
         actionText: 'EXPLORE NOW',
         actionLink: '#',
-        locked: true,
+        locked: false,
         type: 'finance'
       }
     ];
     
-    // Initialize mobile services data (based on second Figma image)
+    // Initialize mobile services data
     this.mobileServices = [
       {
         title: 'Connect Accounts',
@@ -105,7 +131,7 @@ export class LandingComponent implements OnInit {
         iconColor: '#3e7bea', // Blue
         actionText: 'READ MORE',
         actionLink: '#',
-        locked: true,
+        locked: false,
         type: 'accounts'
       },
       {
@@ -114,7 +140,7 @@ export class LandingComponent implements OnInit {
         iconColor: '#3ca1c9', // Light blue
         actionText: 'READ MORE',
         actionLink: '#',
-        locked: true,
+        locked: false,
         type: 'insights'
       },
       {
@@ -141,10 +167,48 @@ export class LandingComponent implements OnInit {
     this.checkScreenSize();
   }
   
-  navigateToRegistration() {
-    this.router.navigate(['/register']);
+  private checkFeatureStatus(): void {
+    // Make API call with correct token to get active features
+    const featuresSub = this.productFeaturesService.getActiveFeatures().subscribe(features => {
+      // Check if Broking feature is active
+      const brokingFeature = features.find(feature => feature.platformProductName === 'Broking');
+      this.brokingServiceEnabled = !!brokingFeature;
+      console.log('Broking service is ' + (this.brokingServiceEnabled ? 'enabled' : 'disabled'));
+      console.log('API response platformProductName:', features.map(f => f.platformProductName));
+      
+      // Update services list based on broking service status
+      this.checkScreenSize();
+    });
+    
+    this.subscriptions.push(featuresSub);
   }
   
-  // No longer needed as we're using the API
-  // Method removed
+  ngOnDestroy(): void {
+    // Clean up all subscriptions to prevent memory leaks
+    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+  }
+  
+  navigateToRegistration() {
+    // Get existing URL parameters if any
+    const existingToken = this.route.snapshot.queryParams['token'];
+    const existingInstitutionAccountId = this.route.snapshot.queryParams['institutionAccountId'];
+    
+    // Create query params object for navigation
+    let queryParams: any = {};
+    
+    // Use the API key encoded in Base64
+    const apiKey = 'pk-live-4NYDjpH5So0-cYWIG9ylUJi5ASL-Y8kg';
+    const encodedApiKey = btoa(apiKey);
+    
+    // Set token parameter (use existing if available, otherwise use encoded API key)
+    queryParams.token = existingToken || encodedApiKey;
+    
+    // Set institutionAccountId parameter (use existing if available, otherwise empty string)
+    queryParams.institutionAccountId = existingInstitutionAccountId || '';
+    
+    console.log('Navigating to registration with params:', queryParams);
+    
+    // Navigate with query parameters
+    this.router.navigate(['/register'], { queryParams });
+  }
 }

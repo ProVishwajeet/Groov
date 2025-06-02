@@ -11,6 +11,7 @@ import { ServiceCardComponent } from './components/service-card/service-card.com
 import { BusinessRegistrationComponent } from './components/business-registration/business-registration.component';
 import { ProgressStepsComponent } from './components/progress-steps/progress-steps.component';
 import { SuccessScreenComponent } from './components/success-screen/success-screen.component';
+import { ApplicantSelectionModalComponent } from './components/applicant-selection-modal/applicant-selection-modal.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { SuccessScreenComponent } from './components/success-screen/success-scre
     ServiceCardComponent,
     BusinessRegistrationComponent,
     ProgressStepsComponent,
-    SuccessScreenComponent
+    SuccessScreenComponent,
+    ApplicantSelectionModalComponent
   ],
   imports: [
     BrowserModule,

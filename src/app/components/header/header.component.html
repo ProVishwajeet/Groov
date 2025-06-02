@@ -3,13 +3,16 @@
     <div class="header-content">
       <div class="logo">
         <a href="/">
-          <!-- Landing page logos -->
-          <img *ngIf="!isRegistrationPage" src="assets/Logo-white.svg" alt="Groov" class="desktop-logo">
-          <img *ngIf="!isRegistrationPage" src="assets/Logo-dark.svg" alt="Groov" class="mobile-logo">
+          <!-- API Institution Logo (when available) -->
+          <img *ngIf="brandLogoUrl" [src]="brandLogoUrl" alt="Institution Logo" class="institution-logo">
           
-          <!-- Registration page logos -->
-          <img *ngIf="isRegistrationPage" src="assets/Logo-white.svg" alt="Groov" class="desktop-logo">
-          <img *ngIf="isRegistrationPage" src="assets/Logo-l2-mobile.svg" alt="Groov" class="mobile-logo">
+          <!-- Default Landing page logos (when API logo not available) -->
+          <img *ngIf="!brandLogoUrl && !isRegistrationPage" src="assets/Logo-white.svg" alt="Groov" class="desktop-logo">
+          <img *ngIf="!brandLogoUrl && !isRegistrationPage" src="assets/Logo-dark.svg" alt="Groov" class="mobile-logo">
+          
+          <!-- Default Registration page logos (when API logo not available) -->
+          <img *ngIf="!brandLogoUrl && isRegistrationPage" src="assets/Logo-white.svg" alt="Groov" class="desktop-logo">
+          <img *ngIf="!brandLogoUrl && isRegistrationPage" src="assets/Logo-l2-mobile.svg" alt="Groov" class="mobile-logo">
         </a>
       </div>
       <!-- Envelope icon excluded as per requirement -->

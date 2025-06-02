@@ -1,3 +1,62 @@
+<!-- Applicant Selection Modal -->
+<div class="modal-overlay" *ngIf="showApplicantModal">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>Select Applicant</h2>
+      <button class="close-button" (click)="closeApplicantModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="applicant-list">
+        <div *ngFor="let officer of companyOfficers" class="applicant-item" (click)="selectApplicant(officer)">
+          <div class="applicant-icon">
+            <i class="user-icon"></i>
+          </div>
+          <div class="applicant-info">
+            <h4>{{officer.name}}</h4>
+            <p *ngIf="officer.email">{{officer.email}}</p>
+            <p *ngIf="!officer.email && officer.occupation">{{officer.occupation}}</p>
+          </div>
+          <div class="applicant-arrow">
+            <i class="arrow-right"></i>
+          </div>
+        </div>
+        <div class="applicant-item" (click)="selectApplicant({name: 'None of above', email: 'Submit'})">
+          <div class="applicant-icon">
+            <i class="user-icon"></i>
+          </div>
+          <div class="applicant-info">
+            <h4>None of above</h4>
+            <p>Submit</p>
+          </div>
+          <div class="applicant-arrow">
+            <i class="arrow-right"></i>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Success Screen -->
+      <div class="success-container" *ngIf="currentStep === 'success'">
+        <div class="success-content">
+          <div class="success-icon">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="40" cy="40" r="40" fill="#0DB14B"/>
+              <path d="M32 40L38 46L50 34" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h2 class="success-title">Thank You {{ firstNameControl?.value || 'Clinton' }} {{ lastNameControl?.value || 'Foy' }}!</h2>
+          <p class="success-message">
+            Your request is now being assessed we will match you with suitable lenders based on your needs.<br>
+            Connecting open Banking will speed up the process, we might request as a follow-up.
+          </p>
+          <button class="btn btn-primary success-button" (click)="connectAccounts()">
+            CONNECT YOUR ACCOUNTS
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="registration-container">
   <div class="registration-wrapper">
     <!-- Left side with welcome text and progress steps -->
@@ -110,7 +169,7 @@
             <div class="search-input-container">
               <input type="text" 
                      [formControl]="searchControl" 
-                     placeholder="Groo" 
+                     placeholder="Search your company" 
                      (input)="searchCompany()" 
                      class="company-search-input">
               <button *ngIf="searchControl.value" 
@@ -135,7 +194,7 @@
         
         <div class="button-group">
           <button class="btn btn-outline" (click)="cancel()">BACK</button>
-          <button class="btn btn-primary" (click)="nextStep()">NEXT</button>
+          <button class="btn btn-primary" (click)="nextStep()" *ngIf="(businessTypeSubStep !== 'company-name' || registeredCompanyName) && !showApplicantModal">NEXT</button>
         </div>
       </div>
       
@@ -231,8 +290,8 @@
               
               <!-- Address Search Results Dropdown -->
               <div class="address-search-results" *ngIf="showAddressResults">
-                <div class="address-result-item" *ngFor="let address of addressResults" (click)="selectAddress(address)">
-                  {{ address }}
+                <div class="address-result-item" *ngFor="let suggestion of addressSuggestions; let i = index" (click)="selectAddress(suggestion)">
+                  {{ suggestion.suggestion }}
                 </div>
               </div>
             </div>
