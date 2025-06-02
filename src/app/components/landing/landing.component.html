@@ -19,7 +19,8 @@
       <p>Connect your accounts, view insights, and explore other options - all in one place</p>
     </div>
     
-    <div class="services-grid">
+    <!-- Added "centered-grid" class conditionally when showing fewer cards -->
+    <div class="services-grid" [ngClass]="{'centered-grid': !brokingServiceEnabled}">
       <div class="service-item" *ngFor="let service of services">
         <app-service-card
           [title]="service.title"
@@ -33,7 +34,11 @@
     </div>
     
     <div class="cta-section">
-      <button class="btn-primary cta-button" (click)="navigateToRegistration()">{{ ctaButtonText }}</button>
+      <!-- GET STARTED button only enabled when broking service is enabled -->
+      <button class="btn-primary cta-button" [disabled]="!brokingServiceEnabled" 
+              (click)="navigateToRegistration()" [ngClass]="{'disabled-button': !brokingServiceEnabled}">
+        {{ ctaButtonText }}
+      </button>
     </div>
     
     <div class="footer">

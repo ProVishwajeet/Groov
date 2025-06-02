@@ -92,9 +92,73 @@
     grid-template-columns: repeat(3, 1fr);
     gap: $spacing-lg;
     margin-bottom: $spacing-2xl;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    
+    &.centered-grid {
+      // When broking service is disabled, show only 2 cards centered
+      grid-template-columns: repeat(2, 1fr);
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      
+      @media (max-width: 768px) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      @media (max-width: 576px) {
+        grid-template-columns: 1fr;
+      }
+    }
     
     .service-item {
       min-height: 200px;
+    }
+  }
+  
+  .toggle-section {
+    text-align: center;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: #f7f9fc;
+    border-radius: 8px;
+    
+    .toggle-button {
+      padding: $spacing-sm $spacing-xl;
+      font-family: 'Figtree', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 24px;
+      letter-spacing: 1px;
+      text-align: center;
+      vertical-align: middle;
+      text-transform: uppercase;
+      background-color: $light-blue;
+      color: $white;
+      border: 1px solid #437FF3;
+      border-radius: $border-radius-md;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      
+      &:hover {
+        background-color: darken($light-blue, 10%);
+      }
+    }
+    
+    .status-indicator {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      
+      .enabled {
+        color: #4CAF50;
+        font-weight: 600;
+      }
+      
+      .disabled {
+        color: #F44336;
+        font-weight: 600;
+      }
     }
   }
   
@@ -121,6 +185,16 @@
       
       &:hover {
         background-color: darken($light-blue, 10%);
+      }
+      
+      &.disabled-button {
+        background-color: #d1d5db;
+        cursor: not-allowed;
+        opacity: 0.7;
+        
+        &:hover {
+          background-color: #d1d5db;
+        }
       }
     }
   }
